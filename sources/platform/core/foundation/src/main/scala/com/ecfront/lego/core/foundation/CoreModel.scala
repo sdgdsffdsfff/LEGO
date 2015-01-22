@@ -9,6 +9,10 @@ abstract class IdModel {
   @BeanProperty var id: String = _
 }
 
+object IdModel{
+  val ID_FLAG = "id"
+}
+
 abstract class SecureModel extends IdModel {
   @BeanProperty var createUser: String = _
   @BeanProperty var createTime: Long = _
@@ -26,8 +30,8 @@ case class PageModel[M](
 
 object PageModel {
 
-  val PAGE_NUMBER_FLAG = "__pageNumber"
-  val PAGE_SIZE_FLAG = "__pageSize"
+  val PAGE_NUMBER_FLAG = "pageNumber"
+  val PAGE_SIZE_FLAG = "pageSize"
 
   def toPage[M](str: String, modelClazz: Class[M]): PageModel[M] = {
     val tmp = JsonHelper.toJson(str)
