@@ -5,6 +5,7 @@ import java.lang.reflect.ParameterizedType
 import com.ecfront.lego.core.component.protocol.RequestProtocol
 import com.ecfront.lego.core.foundation.PageModel
 import com.typesafe.scalalogging.slf4j.LazyLogging
+import collection.JavaConversions._
 
 trait BasicService[M <: AnyRef] extends LazyLogging {
 

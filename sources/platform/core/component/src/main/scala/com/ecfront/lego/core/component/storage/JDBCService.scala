@@ -69,8 +69,6 @@ trait JDBCService[M <: IdModel] extends CoreService[M] {
 
   override protected def doUpdate(id: String, model: M, request: RequestProtocol, success: => (String) => Unit, fail: => (String, String) => Unit =null): Unit = ???
 
-
-
 }
 
 object JDBCService extends LazyLogging {
