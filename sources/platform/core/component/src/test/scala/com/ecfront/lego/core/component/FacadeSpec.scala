@@ -103,5 +103,5 @@ object TestCommunication extends Communication {
       case "DELETE" =>
         complete(ResponseProtocol(StandardCode.SUCCESS_CODE, "", ""))
     }
-  }
-}*/
+  }*/
+}

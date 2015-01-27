@@ -1,14 +1,13 @@
 package com.ecfront.lego.core.component.storage
 
 import com.ecfront.lego.core.component.protocol.RequestProtocol
-import com.ecfront.lego.core.foundation.{PageModel, StandardCode}
+import com.ecfront.lego.core.foundation.{IdModel, PageModel, StandardCode}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.{AsyncResult, Future, Handler, Vertx}
 
 import scala.collection.JavaConversions._
-import scala.collection.mutable.ArrayBuffer
 
-trait VertxStorageService[M <: AnyRef] extends JDBCService[M] {
+trait VertxStorageService[M <: IdModel] extends JDBCService[M] {
 
   override protected def doGetById(id: String, request: RequestProtocol, success: => (M) => Unit, fail: => (String, String) => Unit): Unit =
     VertxStorageService.execute[M]({
@@ -28,7 +27,7 @@ trait VertxStorageService[M <: AnyRef] extends JDBCService[M] {
         JDBCService.db.findObjects("SELECT * FROM " + tableName + " WHERE " + condition, modelClazz).toList
     }, success, fail)
 
-  override protected def doFindByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => (PageModel[M]) => Unit, fail: => (String, String) => Unit): Unit =
+  override protected def doPageByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => (PageModel[M]) => Unit, fail: => (String, String) => Unit): Unit =
     VertxStorageService.execute[PageModel[M]]({
       (Void) =>
         val page = JDBCService.db.findObjects("SELECT * FROM " + tableName + " WHERE " + condition, pageNumber, pageSize, modelClazz)
@@ -41,24 +40,28 @@ trait VertxStorageService[M <: AnyRef] extends JDBCService[M] {
         JDBCService.db.findObjects("SELECT * FROM %s".format(tableName), modelClazz).toList
     }, success, fail)
 
-  override protected def doFindAll(pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => (PageModel[M]) => Unit, fail: => (String, String) => Unit): Unit =
+  override protected def doPageAll(pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => (PageModel[M]) => Unit, fail: => (String, String) => Unit): Unit =
     VertxStorageService.execute[PageModel[M]]({
       (Void) =>
         val page = JDBCService.db.findObjects("SELECT * FROM %s".format(tableName), pageNumber, pageSize, modelClazz)
         PageModel(page.pageNumber, page.pageSize, page.pageTotal, page.recordTotal, page.objects.toList)
     }, success, fail)
 
-  override protected def doSave(sql: String, params: ArrayBuffer[AnyRef], request: RequestProtocol, success: => (Unit) => Unit, fail: => (String, String) => Unit = null): Unit =
+  override protected def doSave(model: M, request: RequestProtocol, success: => (String) => Unit, fail: => (String, String) => Unit): Unit = {
+    val (sql, params) = packageSaveSql(model, request)
     VertxStorageService.execute[Unit]({
-      JDBCService.db.update("INSERT INTO % " + tableName + sql, params.toArray)
+      JDBCService.db.update(sql, params)
       null
-    }, success, fail)
+    }, { Unit => success}, fail)
+  }
 
-  override protected def doUpdate(id: String, sql: String, params: ArrayBuffer[AnyRef], request: RequestProtocol, success: => (Unit) => Unit, fail: => (String, String) => Unit = null): Unit =
+  override protected def doUpdate(id: String, model: M, request: RequestProtocol, success: => (String) => Unit, fail: => (String, String) => Unit): Unit = {
+    val (sql, params) = packageUpdateSql(id, model, request)
     VertxStorageService.execute[Unit]({
-      JDBCService.db.update("UPDATE  " + tableName + " SET " + sql + " WHERE id ='%s'".format(id), params.toArray)
+      JDBCService.db.update(sql, params.toArray)
       null
-    }, success, fail)
+    }, { Unit => success}, fail)
+  }
 
   override protected def doDeleteById(id: String, request: RequestProtocol, success: => (Unit) => Unit, fail: => (String, String) => Unit): Unit =
     VertxStorageService.execute[Unit]({
@@ -105,7 +108,10 @@ object VertxStorageService extends LazyLogging {
         if (e.succeeded()) {
           success(e.result())
         } else {
-          fail(StandardCode.FORBIDDEN_CODE, "SQL execute error:" + e.cause().getMessage)
+          logger.error(StandardCode.FORBIDDEN_CODE, "SQL execute error", e.cause())
+          if (fail != null) {
+            fail(StandardCode.FORBIDDEN_CODE, "SQL execute error:" + e.cause().getMessage)
+          }
         }
       }
     })

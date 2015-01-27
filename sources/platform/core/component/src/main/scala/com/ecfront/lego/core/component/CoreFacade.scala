@@ -28,7 +28,7 @@ trait CoreFacade[M <: AnyRef] extends BasicService[M] {
     CoreFacade.executeArray(address, "FIND", Map[String, Any](), null, modelClazz, request, success, fail)
   }
 
-  override protected def doFindAll(pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => (PageModel[M]) => Unit, fail: => (String, String) => Unit = null): Unit = {
+  override protected def doPageAll(pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => (PageModel[M]) => Unit, fail: => (String, String) => Unit = null): Unit = {
     CoreFacade.executePage(address, "FIND", Map[String, Any](), null, pageNumber, pageSize, modelClazz, request, success, fail)
   }
 
@@ -36,7 +36,7 @@ trait CoreFacade[M <: AnyRef] extends BasicService[M] {
     CoreFacade.executeArray(address, "FIND", Map[String, Any](), condition, modelClazz, request, success, fail)
   }
 
-  override protected def doFindByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => (PageModel[M]) => Unit, fail: => (String, String) => Unit = null): Unit = {
+  override protected def doPageByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => (PageModel[M]) => Unit, fail: => (String, String) => Unit = null): Unit = {
     CoreFacade.executePage(address, "FIND", Map[String, Any](), condition, pageNumber, pageSize, modelClazz, request, success, fail)
   }
 
@@ -47,6 +47,18 @@ trait CoreFacade[M <: AnyRef] extends BasicService[M] {
         CoreFacade.execute(address, "SAVE", Map[String, Any](), model, classOf[String], request, success, fail)
       case tModel: SecureModel =>
         tModel.id = UUID.randomUUID().toString
+        if (tModel.createTime == 0) {
+          tModel.createTime = System.currentTimeMillis()
+        }
+        if (tModel.createUser == null) {
+          tModel.createUser = request.userId
+        }
+        CoreFacade.execute(address, "SAVE", Map[String, Any](), tModel, classOf[String], request, success, fail)
+      case tModel: AppSecureModel =>
+        tModel.id = UUID.randomUUID().toString
+        if (tModel.appId == null) {
+          tModel.appId = request.appId
+        }
         if (tModel.createTime == 0) {
           tModel.createTime = System.currentTimeMillis()
         }
@@ -69,6 +81,18 @@ trait CoreFacade[M <: AnyRef] extends BasicService[M] {
             CoreFacade.execute(address, "UPDATE", Map[String, Any](IdModel.ID_FLAG -> id), model, classOf[String], request, success, fail)
           case tModel: SecureModel =>
             tModel.id = UUID.randomUUID().toString
+            if (tModel.updateTime == 0) {
+              tModel.updateTime = System.currentTimeMillis()
+            }
+            if (tModel.updateUser == null) {
+              tModel.updateUser = request.userId
+            }
+            CoreFacade.execute(address, "UPDATE", Map[String, Any](IdModel.ID_FLAG -> id), model, classOf[String], request, success, fail)
+          case tModel: AppSecureModel =>
+            tModel.id = UUID.randomUUID().toString
+            if (tModel.appId == null) {
+              tModel.appId = request.appId
+            }
             if (tModel.updateTime == 0) {
               tModel.updateTime = System.currentTimeMillis()
             }

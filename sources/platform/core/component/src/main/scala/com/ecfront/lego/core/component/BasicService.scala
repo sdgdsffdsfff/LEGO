@@ -84,20 +84,20 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
 
   protected def doFindAll(request: RequestProtocol, success: => List[M] => Unit, fail: => (String, String) => Unit = null): Unit
 
-  protected def preFindAll(pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
+  protected def prePageAll(pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
     success(null)
   }
 
-  protected def postFindAll(result: PageModel[M], preResult: Any, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
+  protected def postPageAll(result: PageModel[M], preResult: Any, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
     success(result)
   }
 
-  def findAll(pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
-    preFindAll(pageNumber, pageSize, request, {
+  def pageAll(pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
+    prePageAll(pageNumber, pageSize, request, {
       preResult =>
-        doFindAll(pageNumber, pageSize, request, {
+        doPageAll(pageNumber, pageSize, request, {
           result =>
-            postFindAll(result, preResult, pageNumber, pageSize, request, success, fail)
+            postPageAll(result, preResult, pageNumber, pageSize, request, success, fail)
         }, fail)
     }, {
       (code, message) =>
@@ -105,7 +105,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     })
   }
 
-  protected def doFindAll(pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit
+  protected def doPageAll(pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit
 
 
   protected def preFindByCondition(condition: String, request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
@@ -131,20 +131,20 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
 
   protected def doFindByCondition(condition: String, request: RequestProtocol, success: => List[M] => Unit, fail: => (String, String) => Unit = null): Unit
 
-  protected def preFindByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
+  protected def prePageByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
     success(null)
   }
 
-  protected def postFindByCondition(result: PageModel[M], preResult: Any, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
+  protected def postPageByCondition(result: PageModel[M], preResult: Any, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
     success(result)
   }
 
-  def findByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
-    preFindByCondition(condition, pageNumber, pageSize, request, {
+  def pageByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
+    prePageByCondition(condition, pageNumber, pageSize, request, {
       preResult =>
-        doFindByCondition(condition, pageNumber, pageSize, request, {
+        doPageByCondition(condition, pageNumber, pageSize, request, {
           result =>
-            postFindByCondition(result, preResult, pageNumber, pageSize, request, success, fail)
+            postPageByCondition(result, preResult, pageNumber, pageSize, request, success, fail)
         }, fail)
     }, {
       (code, message) =>
@@ -152,7 +152,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     })
   }
 
-  protected def doFindByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit
+  protected def doPageByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit
 
 
   protected def preSave(model: M, request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {

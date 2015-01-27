@@ -1,10 +1,13 @@
 package com.ecfront.lego.core.component.storage
 
+import java.util.UUID
+
 import com.ecfront.easybi.dbutils.exchange.{DB, DS}
 import com.ecfront.lego.core.component.CoreService
 import com.ecfront.lego.core.component.protocol.RequestProtocol
 import com.ecfront.lego.core.foundation.IdModel
 import com.typesafe.scalalogging.slf4j.LazyLogging
+import org.apache.commons.beanutils.PropertyUtils
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -12,61 +15,50 @@ trait JDBCService[M <: IdModel] extends CoreService[M] {
 
   protected val tableName = modelClazz.getSimpleName
 
-  protected def preSave(sql: String, params: ArrayBuffer[AnyRef], request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
-    success(null)
+  protected def packageSaveSql(model: M, request: RequestProtocol): (String, Array[Any]) = {
+    val sb = new StringBuilder("INSERT INTO " + tableName + " ( ")
+    val keys = new ArrayBuffer[String]()
+    val values = new ArrayBuffer[String]()
+    val params = ArrayBuffer[Any]()
+    val fields = JDBCService.getFields(model)
+    fields.foreach {
+      field =>
+        keys += field._1
+        values += "?"
+        val value= field._1 match {
+          case f if f == "id" && field._2 == null => UUID.randomUUID().toString
+          case f if f == "createUser" && field._2 == null => request.userId
+          case f if f == "updateUser" && field._2 == null => request.userId
+          case f if f == "createTime" && field._2 == null => System.currentTimeMillis()
+          case f if f == "updateTime" && field._2 == null => System.currentTimeMillis()
+          case f if f == "appId" && field._2 == null => request.appId
+          case _ => field._2
+        }
+        params +=value
+    }
+    sb.append(keys.mkString(",") + ") VALUES ( " + values.mkString(",") + " )")
+    (sb.toString(), params.toArray)
   }
 
-  def save(sql: String, params: ArrayBuffer[AnyRef], request: RequestProtocol, success: => Unit => Unit, fail: => (String, String) => Unit = null): Unit = {
-    preSave(sql, params, request, {
-      preResult =>
-        doSave(sql, params, request, {
-          result =>
-            postSave("", preResult, request, {
-              id =>
-                success(null)
-            }, fail)
-        }, fail)
-    }, {
-      (code, message) =>
-        fail(code, message)
-    })
+  protected def packageUpdateSql(id:String,model: M, request: RequestProtocol): (String, Array[AnyRef]) = {
+    val sb = new StringBuilder("UPDATE " + tableName + " SET ")
+    val keys = new ArrayBuffer[String]()
+    val params = ArrayBuffer[AnyRef]()
+    val fields = JDBCService.getFields(model)
+    fields.foreach {
+      field =>
+        keys += field._1+"=?"
+        params += field._1 match {
+          case f if f == "updateUser" && field._2 == null => request.userId
+          case f if f == "updateTime" && field._2 == null => System.currentTimeMillis()
+          case f if f == "appId" && field._2 == null => request.appId
+          case _ => field._2
+        }
+    }
+    params+=id
+    sb.append(keys.mkString(",") + " WHERE id= ? ")
+    (sb.toString(), params.toArray)
   }
-
-  protected def doSave(sql: String, params: ArrayBuffer[AnyRef], request: RequestProtocol, success: => Unit => Unit, fail: => (String, String) => Unit = null): Unit
-
-  protected def preUpdate(id: String, sql: String, params: ArrayBuffer[AnyRef], request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
-    success(null)
-  }
-
-  def update(id: String, sql: String, params: ArrayBuffer[AnyRef], request: RequestProtocol, success: => Unit => Unit, fail: => (String, String) => Unit = null): Unit = {
-    preUpdate(id, sql, params, request, {
-      preResult =>
-        doUpdate(id, sql, params, request, {
-          result =>
-            postUpdate("", preResult, request, {
-              id =>
-                success(null)
-            }, fail)
-        }, fail)
-    }, {
-      (code, message) =>
-        fail(code, message)
-    })
-  }
-
-  protected def doUpdate(id: String, sql: String, params: ArrayBuffer[AnyRef], request: RequestProtocol, success: => Unit => Unit, fail: => (String, String) => Unit = null): Unit
-
-  override protected def preSave(model: M, request: RequestProtocol, success: => (Any) => Unit, fail: => (String, String) => Unit = null): Unit = ???
-
-  override protected def save(model: M, request: RequestProtocol, success: => (String) => Unit, fail: => (String, String) => Unit = null): Unit = ???
-
-  override protected def doSave(model: M, request: RequestProtocol, success: => (String) => Unit, fail: => (String, String) => Unit = null): Unit = ???
-
-  override protected def preUpdate(id: String, model: M, request: RequestProtocol, success: => (Any) => Unit, fail: => (String, String) => Unit = null): Unit = ???
-
-  override protected def update(id: String, model: M, request: RequestProtocol, success: => (String) => Unit, fail: => (String, String) => Unit = null): Unit = ???
-
-  override protected def doUpdate(id: String, model: M, request: RequestProtocol, success: => (String) => Unit, fail: => (String, String) => Unit = null): Unit = ???
 
 }
 
@@ -77,6 +69,11 @@ object JDBCService extends LazyLogging {
   def init(dbConfig: String): Unit = {
     DS.setConfigPath(dbConfig)
     db = new DB()
+  }
+
+  def getFields[M <: IdModel](model: M): Map[String, Any] = {
+    import scala.collection.JavaConversions._
+    PropertyUtils.describe(model).toMap
   }
 
 }

@@ -20,6 +20,10 @@ abstract class SecureModel extends IdModel {
   @BeanProperty var updateTime: Long = _
 }
 
+abstract class AppSecureModel extends SecureModel {
+  @BeanProperty var appId: String = _
+}
+
 case class PageModel[M](
                          @BeanProperty var pageNumber: Long,
                          @BeanProperty var pageSize: Long,
