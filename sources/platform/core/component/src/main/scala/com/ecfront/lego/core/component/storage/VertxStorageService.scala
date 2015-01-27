@@ -4,7 +4,8 @@ import com.ecfront.lego.core.component.protocol.RequestProtocol
 import com.ecfront.lego.core.foundation.{PageModel, StandardCode}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.{AsyncResult, Future, Handler, Vertx}
-import collection.JavaConversions._
+
+import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 
 trait VertxStorageService[M <: AnyRef] extends JDBCService[M] {
@@ -12,25 +13,25 @@ trait VertxStorageService[M <: AnyRef] extends JDBCService[M] {
   override protected def doGetById(id: String, request: RequestProtocol, success: => (M) => Unit, fail: => (String, String) => Unit): Unit =
     VertxStorageService.execute[M]({
       (Void) =>
-        JDBCService.db.getObject("SELECT * FROM %s WHERE id=%s".format(tableName, id), modelClazz)
+        JDBCService.db.getObject("SELECT * FROM %s WHERE id='%s'".format(tableName, id), modelClazz)
     }, success, fail)
 
   override protected def doGetByCondition(condition: String, request: RequestProtocol, success: => (M) => Unit, fail: => (String, String) => Unit): Unit =
     VertxStorageService.execute[M]({
       (Void) =>
-        JDBCService.db.getObject(condition, modelClazz)
+        JDBCService.db.getObject("SELECT * FROM " + tableName + " WHERE " + condition, modelClazz)
     }, success, fail)
 
   override protected def doFindByCondition(condition: String, request: RequestProtocol, success: => (List[M]) => Unit, fail: => (String, String) => Unit): Unit =
     VertxStorageService.execute[List[M]]({
       (Void) =>
-        JDBCService.db.findObjects(condition, modelClazz).toList
+        JDBCService.db.findObjects("SELECT * FROM " + tableName + " WHERE " + condition, modelClazz).toList
     }, success, fail)
 
   override protected def doFindByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => (PageModel[M]) => Unit, fail: => (String, String) => Unit): Unit =
     VertxStorageService.execute[PageModel[M]]({
       (Void) =>
-        val page = JDBCService.db.findObjects(condition, pageNumber, pageSize, modelClazz)
+        val page = JDBCService.db.findObjects("SELECT * FROM " + tableName + " WHERE " + condition, pageNumber, pageSize, modelClazz)
         PageModel(page.pageNumber, page.pageSize, page.pageTotal, page.recordTotal, page.objects.toList)
     }, success, fail)
 
@@ -49,25 +50,25 @@ trait VertxStorageService[M <: AnyRef] extends JDBCService[M] {
 
   override protected def doSave(sql: String, params: ArrayBuffer[AnyRef], request: RequestProtocol, success: => (Unit) => Unit, fail: => (String, String) => Unit = null): Unit =
     VertxStorageService.execute[Unit]({
-      JDBCService.db.update(sql, params.toArray)
+      JDBCService.db.update("INSERT INTO % " + tableName + sql, params.toArray)
       null
     }, success, fail)
 
   override protected def doUpdate(id: String, sql: String, params: ArrayBuffer[AnyRef], request: RequestProtocol, success: => (Unit) => Unit, fail: => (String, String) => Unit = null): Unit =
     VertxStorageService.execute[Unit]({
-      JDBCService.db.update(sql, params.toArray)
+      JDBCService.db.update("UPDATE  " + tableName + " SET " + sql + " WHERE id ='%s'".format(id), params.toArray)
       null
     }, success, fail)
 
   override protected def doDeleteById(id: String, request: RequestProtocol, success: => (Unit) => Unit, fail: => (String, String) => Unit): Unit =
     VertxStorageService.execute[Unit]({
-      JDBCService.db.update("DELETE FROM %s WHERE id=%s".format(tableName, id))
+      JDBCService.db.update("DELETE FROM %s WHERE id='%s'".format(tableName, id))
       null
     }, success, fail)
 
   override protected def doDeleteByCondition(condition: String, request: RequestProtocol, success: => (Unit) => Unit, fail: => (String, String) => Unit): Unit =
     VertxStorageService.execute[Unit]({
-      JDBCService.db.update(condition)
+      JDBCService.db.update("DELETE FROM " + tableName + " WHERE " + condition)
       null
     }, success, fail)
 
@@ -85,6 +86,7 @@ object VertxStorageService extends LazyLogging {
 
   def init(vert: Vertx, dbConfig: String): Unit = {
     vertx = vert
+    JDBCService.init(dbConfig)
   }
 
   private def execute[M](sqlExecute: => Unit => M, success: => (M) => Unit, fail: => (String, String) => Unit = null): Unit = {

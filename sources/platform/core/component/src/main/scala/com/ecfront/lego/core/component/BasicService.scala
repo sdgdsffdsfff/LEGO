@@ -21,7 +21,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     success(result)
   }
 
-  protected def getById(id: String, request: RequestProtocol, success: => M => Unit, fail: => (String, String) => Unit = null): Unit = {
+  def getById(id: String, request: RequestProtocol, success: => M => Unit, fail: => (String, String) => Unit = null): Unit = {
     preGetById(id, request, {
       preResult =>
         doGetById(id, request, {
@@ -45,7 +45,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     success(result)
   }
 
-  protected def getByCondition(condition: String, request: RequestProtocol, success: => M => Unit, fail: => (String, String) => Unit = null): Unit = {
+  def getByCondition(condition: String, request: RequestProtocol, success: => M => Unit, fail: => (String, String) => Unit = null): Unit = {
     preGetByCondition(condition, request, {
       preResult =>
         doGetByCondition(condition, request, {
@@ -69,7 +69,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     success(result)
   }
 
-  protected def findAll(request: RequestProtocol, success: => List[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
+  def findAll(request: RequestProtocol, success: => List[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
     preFindAll(request, {
       preResult =>
         doFindAll(request, {
@@ -92,7 +92,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     success(result)
   }
 
-  protected def findAll(pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
+  def findAll(pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
     preFindAll(pageNumber, pageSize, request, {
       preResult =>
         doFindAll(pageNumber, pageSize, request, {
@@ -116,7 +116,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     success(result)
   }
 
-  protected def findByCondition(condition: String, request: RequestProtocol, success: => List[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
+  def findByCondition(condition: String, request: RequestProtocol, success: => List[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
     preFindByCondition(condition, request, {
       preResult =>
         doFindByCondition(condition, request, {
@@ -139,7 +139,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     success(result)
   }
 
-  protected def findByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
+  def findByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
     preFindByCondition(condition, pageNumber, pageSize, request, {
       preResult =>
         doFindByCondition(condition, pageNumber, pageSize, request, {
@@ -163,7 +163,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     success(result)
   }
 
-  protected def save(model: M, request: RequestProtocol, success: => String => Unit, fail: => (String, String) => Unit = null): Unit = {
+  def save(model: M, request: RequestProtocol, success: => String => Unit, fail: => (String, String) => Unit = null): Unit = {
     preSave(model, request, {
       preResult =>
         doSave(model, request, {
@@ -186,7 +186,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     success(result)
   }
 
-  protected def update(id: String, model: M, request: RequestProtocol, success: => String => Unit, fail: => (String, String) => Unit = null): Unit = {
+  def update(id: String, model: M, request: RequestProtocol, success: => String => Unit, fail: => (String, String) => Unit = null): Unit = {
     preUpdate(id, model, request, {
       preResult =>
         doUpdate(id, model, request, {
@@ -209,7 +209,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     success()
   }
 
-  protected def deleteById(id: String, request: RequestProtocol, success: => Unit => Unit, fail: => (String, String) => Unit = null): Unit = {
+  def deleteById(id: String, request: RequestProtocol, success: => Unit => Unit, fail: => (String, String) => Unit = null): Unit = {
     preDeleteById(id, request, {
       preResult =>
         doDeleteById(id, request, {
@@ -232,7 +232,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     success()
   }
 
-  protected def deleteByCondition(condition: String, request: RequestProtocol, success: => Unit => Unit, fail: => (String, String) => Unit = null): Unit = {
+  def deleteByCondition(condition: String, request: RequestProtocol, success: => Unit => Unit, fail: => (String, String) => Unit = null): Unit = {
     preDeleteByCondition(condition, request, {
       preResult =>
         doDeleteByCondition(condition, request, {
@@ -256,7 +256,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     success()
   }
 
-  protected def deleteAll(request: RequestProtocol, success: => Unit => Unit, fail: => (String, String) => Unit = null): Unit = {
+  def deleteAll(request: RequestProtocol, success: => Unit => Unit, fail: => (String, String) => Unit = null): Unit = {
     preDeleteAll(request, {
       preResult =>
         doDeleteAll(request, {

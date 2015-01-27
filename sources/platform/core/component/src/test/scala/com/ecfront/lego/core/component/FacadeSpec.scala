@@ -1,7 +1,6 @@
 package com.ecfront.lego.core.component
 
 import com.ecfront.common.JsonHelper
-import com.ecfront.lego.core.component.CoreService
 import com.ecfront.lego.core.component.communication.Communication
 import com.ecfront.lego.core.component.protocol.{RequestProtocol, ResponseProtocol}
 import com.ecfront.lego.core.foundation.{PageModel, SecureModel, StandardCode}
@@ -12,7 +11,7 @@ import scala.collection.mutable.ArrayBuffer
 
 class CoreServiceSpec extends FunSuite {
 
-  test("基础服务测试") {
+  /*test("基础服务测试") {
     CoreService.init(TestCommunication)
     val request = RequestProtocol("11", "jzy", "test")
 
@@ -23,6 +22,9 @@ class CoreServiceSpec extends FunSuite {
       (code, message) =>
         assert(false)
     })
+
+    val model=TestModel("haha")
+    model.id="id001"
     TestService.save(TestModel("haha"), request, {
       id =>
         assert(id == "id001")
@@ -102,4 +104,4 @@ object TestCommunication extends Communication {
         complete(ResponseProtocol(StandardCode.SUCCESS_CODE, "", ""))
     }
   }
-}
+}*/
