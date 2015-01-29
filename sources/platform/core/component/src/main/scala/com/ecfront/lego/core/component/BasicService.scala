@@ -1,11 +1,12 @@
 package com.ecfront.lego.core.component
 
 import java.lang.reflect.ParameterizedType
+import java.util.UUID
 
+import com.ecfront.common.BeanHelper
 import com.ecfront.lego.core.component.protocol.RequestProtocol
-import com.ecfront.lego.core.foundation.PageModel
+import com.ecfront.lego.core.foundation.{AppSecureModel, IdModel, PageModel, SecureModel}
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import collection.JavaConversions._
 
 trait BasicService[M <: AnyRef] extends LazyLogging {
 
@@ -164,6 +165,29 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
   }
 
   def save(model: M, request: RequestProtocol, success: => String => Unit, fail: => (String, String) => Unit = null): Unit = {
+    model match {
+      case tModel: AppSecureModel =>
+        if (tModel.id == null) {
+          tModel.id = UUID.randomUUID().toString
+        }
+        tModel.appId = request.appId
+        tModel.createTime = System.currentTimeMillis()
+        tModel.createUser = request.userId
+        tModel.updateTime = System.currentTimeMillis()
+        tModel.updateUser = request.userId
+      case tModel: SecureModel =>
+        if (tModel.id == null) {
+          tModel.id = UUID.randomUUID().toString
+        }
+        tModel.createTime = System.currentTimeMillis()
+        tModel.createUser = request.userId
+        tModel.updateTime = System.currentTimeMillis()
+        tModel.updateUser = request.userId
+      case tModel: IdModel =>
+        if (tModel.id == null) {
+          tModel.id = UUID.randomUUID().toString
+        }
+    }
     preSave(model, request, {
       preResult =>
         doSave(model, request, {
@@ -187,15 +211,30 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
   }
 
   def update(id: String, model: M, request: RequestProtocol, success: => String => Unit, fail: => (String, String) => Unit = null): Unit = {
-    preUpdate(id, model, request, {
-      preResult =>
-        doUpdate(id, model, request, {
-          result =>
-            postUpdate(result, preResult, request, success, fail)
-        }, fail)
-    }, {
-      (code, message) =>
-        fail(code, message)
+    getById(id, request, {
+      oldModel =>
+        BeanHelper.copyProperties(oldModel, model)
+        model match {
+          case tModel: AppSecureModel =>
+            tModel.appId = request.appId
+            tModel.updateTime = System.currentTimeMillis()
+            tModel.updateUser = request.userId
+          case tModel: SecureModel =>
+            tModel.updateTime = System.currentTimeMillis()
+            tModel.updateUser = request.userId
+        }
+        preUpdate(id, model, request, {
+          preResult =>
+            doUpdate(id, model, request, {
+              result =>
+                postUpdate(result, preResult, request, success, fail)
+            }, fail)
+        }, {
+          (code, message) =>
+            fail(code, message)
+        })
+    }, { (code, message) =>
+      fail(code, message)
     })
   }
 
@@ -271,6 +310,9 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
 
   protected def doDeleteAll(request: RequestProtocol, success: => Unit => Unit, fail: => (String, String) => Unit = null): Unit
 
+  protected def init(modelClazz: Class[M]): Unit
+
+  init(modelClazz)
 }
 
 

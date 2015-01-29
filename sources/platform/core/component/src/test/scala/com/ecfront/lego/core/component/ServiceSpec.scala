@@ -1,10 +1,12 @@
 package com.ecfront.lego.core.component
 
+import java.util.concurrent.CountDownLatch
+
 import com.ecfront.lego.core.component.protocol.RequestProtocol
 import com.ecfront.lego.core.component.storage.VertxStorageService
 import com.ecfront.lego.core.foundation.SecureModel
 import io.vertx.core.Vertx
-import org.scalatest.FunSuite
+import org.scalatest._
 
 import scala.beans.BeanProperty
 
@@ -18,12 +20,17 @@ class ServiceSpec extends FunSuite {
 
   test("JDBC服务测试") {
 
-    VertxStorageService.init(Vertx.vertx(), testPath+"config.properties")
+    val w = new CountDownLatch(1)
+
+    VertxStorageService.init(Vertx.vertx(), testPath)
 
     val request = RequestProtocol("0000", "jzy", "test_app")
 
     //-------------------save--------------------------------------------
-    val model = TestModel("张三", true)
+    val model = TestModel()
+    model.name="张三"
+    model.bool=true
+    model.age=14
     model.id = "id001"
     TestService.save(model, request, {
       Unit =>
@@ -31,18 +38,18 @@ class ServiceSpec extends FunSuite {
         TestService.getById("id001", request, {
           model =>
             assert(model.name == "张三")
-            assert(model.bool == true)
-            assert(model.createUser =="jzy")
-            assert(model.updateUser =="jzy")
-            assert(model.createTime !=null)
-            assert(model.updateTime !=null)
+            assert(model.bool)
+            assert(model.createUser == "jzy")
+            assert(model.updateUser == "jzy")
+            assert(model.createTime != null)
+            assert(model.updateTime != null)
             //--------------------update-------------------------------------------
             model.name = "haha"
             model.bool = false
             TestService.update("id001", model, request, {
               id =>
                 assert(model.name == "haha")
-                assert(model.bool == false)
+                assert(!model.bool)
                 //--------------------getByCondition-------------------------------------------
                 TestService.getByCondition("id='%s' AND name='%s'".format("id001", "haha"), request, {
                   model =>
@@ -56,10 +63,13 @@ class ServiceSpec extends FunSuite {
                         model.id = null
                         TestService.save(model, request, {
                           Unit =>
+                            model.id = null
                             TestService.save(model, request, {
                               Unit =>
+                                model.id = null
                                 TestService.save(model, request, {
                                   Unit =>
+                                    model.id = null
                                     model.name = "last"
                                     TestService.save(model, request, {
                                       Unit =>
@@ -70,9 +80,8 @@ class ServiceSpec extends FunSuite {
                                             assert(pages.getPageSize == 2)
                                             assert(pages.getPageTotal == 3)
                                             assert(pages.getRecordTotal == 5)
-                                            assert(pages.getResults.last.name == "last")
                                             //-----------------------pageByCondition----------------------------------------
-                                            TestService.pageByCondition("name = '%s' ORDER BY id desc".format("haha"), 1, 3, request, {
+                                            TestService.pageByCondition("name = '%s' ORDER BY createTime desc".format("haha"), 1, 3, request, {
                                               pages =>
                                                 assert(pages.getPageNumber == 1)
                                                 assert(pages.getPageSize == 3)
@@ -93,6 +102,8 @@ class ServiceSpec extends FunSuite {
                                                                 TestService.findAll(request, {
                                                                   Unit =>
                                                                     assert(result.size == 0)
+
+                                                                    w.countDown()
                                                                 })
                                                             })
                                                         })
@@ -109,13 +120,16 @@ class ServiceSpec extends FunSuite {
             })
         })
     })
+
+    w.await()
   }
 }
 
 object TestService extends VertxStorageService[TestModel]
 
-case class TestModel(
-                      @BeanProperty var name: String,
-                      @BeanProperty var bool: Boolean
-                      ) extends SecureModel
+case class TestModel() extends SecureModel{
+  @BeanProperty var name: String=_
+  @BeanProperty var bool: Boolean=_
+  @BeanProperty @com.ecfront.common.Ignore var age: Int=_
+}
 

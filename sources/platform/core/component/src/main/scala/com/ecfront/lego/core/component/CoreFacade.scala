@@ -1,8 +1,6 @@
 package com.ecfront.lego.core.component
 
-import java.util.UUID
-
-import com.ecfront.common.{BeanHelper, JsonHelper}
+import com.ecfront.common.JsonHelper
 import com.ecfront.lego.core.component.communication.Communication
 import com.ecfront.lego.core.component.protocol.RequestProtocol
 import com.ecfront.lego.core.foundation._
@@ -41,69 +39,11 @@ trait CoreFacade[M <: AnyRef] extends BasicService[M] {
   }
 
   override protected def doSave(model: M, request: RequestProtocol, success: => (String) => Unit, fail: => (String, String) => Unit = null): Unit = {
-    model match {
-      case tModel: IdModel =>
-        tModel.id = UUID.randomUUID().toString
-        CoreFacade.execute(address, "SAVE", Map[String, Any](), model, classOf[String], request, success, fail)
-      case tModel: SecureModel =>
-        tModel.id = UUID.randomUUID().toString
-        if (tModel.createTime == 0) {
-          tModel.createTime = System.currentTimeMillis()
-        }
-        if (tModel.createUser == null) {
-          tModel.createUser = request.userId
-        }
-        CoreFacade.execute(address, "SAVE", Map[String, Any](), tModel, classOf[String], request, success, fail)
-      case tModel: AppSecureModel =>
-        tModel.id = UUID.randomUUID().toString
-        if (tModel.appId == null) {
-          tModel.appId = request.appId
-        }
-        if (tModel.createTime == 0) {
-          tModel.createTime = System.currentTimeMillis()
-        }
-        if (tModel.createUser == null) {
-          tModel.createUser = request.userId
-        }
-        CoreFacade.execute(address, "SAVE", Map[String, Any](), tModel, classOf[String], request, success, fail)
-      case _ =>
-        CoreFacade.execute(address, "SAVE", Map[String, Any](), model, classOf[String], request, success, fail)
-    }
+    CoreFacade.execute(address, "SAVE", Map[String, Any](), model, classOf[String], request, success, fail)
   }
 
   override protected def doUpdate(id: String, model: M, request: RequestProtocol, success: => (String) => Unit, fail: => (String, String) => Unit = null): Unit = {
-    getById(id, request, {
-      oldModel =>
-        BeanHelper.copyProperties(model, oldModel)
-        model match {
-          case tModel: IdModel =>
-            tModel.id = UUID.randomUUID().toString
-            CoreFacade.execute(address, "UPDATE", Map[String, Any](IdModel.ID_FLAG -> id), model, classOf[String], request, success, fail)
-          case tModel: SecureModel =>
-            tModel.id = UUID.randomUUID().toString
-            if (tModel.updateTime == 0) {
-              tModel.updateTime = System.currentTimeMillis()
-            }
-            if (tModel.updateUser == null) {
-              tModel.updateUser = request.userId
-            }
-            CoreFacade.execute(address, "UPDATE", Map[String, Any](IdModel.ID_FLAG -> id), model, classOf[String], request, success, fail)
-          case tModel: AppSecureModel =>
-            tModel.id = UUID.randomUUID().toString
-            if (tModel.appId == null) {
-              tModel.appId = request.appId
-            }
-            if (tModel.updateTime == 0) {
-              tModel.updateTime = System.currentTimeMillis()
-            }
-            if (tModel.updateUser == null) {
-              tModel.updateUser = request.userId
-            }
-            CoreFacade.execute(address, "UPDATE", Map[String, Any](IdModel.ID_FLAG -> id), model, classOf[String], request, success, fail)
-          case _ =>
-            CoreFacade.execute(address, "UPDATE", Map[String, Any](IdModel.ID_FLAG -> id), model, classOf[String], request, success, fail)
-        }
-    }, fail)
+    CoreFacade.execute(address, "UPDATE", Map[String, Any](IdModel.ID_FLAG -> id), model, classOf[String], request, success, fail)
   }
 
 
@@ -154,10 +94,10 @@ object CoreFacade extends LazyLogging {
     //TODO cache
     request.action = action
     request.parameters = parameters
-    if(action =="SAVE" || action =="UPDATE"){
-      request.body=JsonHelper.toJsonString(body)
-    }else{
-      request.body=body.asInstanceOf[String]
+    if (action == "SAVE" || action == "UPDATE") {
+      request.body = JsonHelper.toJsonString(body)
+    } else {
+      request.body = body.asInstanceOf[String]
     }
 
     communication.send(address, request, {

@@ -1,5 +1,6 @@
 package com.ecfront.lego.core.component.storage
 
+import com.ecfront.common.BeanHelper
 import com.ecfront.lego.core.component.protocol.RequestProtocol
 import com.ecfront.lego.core.foundation.{IdModel, PageModel, StandardCode}
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -9,10 +10,14 @@ import scala.collection.JavaConversions._
 
 trait VertxStorageService[M <: IdModel] extends JDBCService[M] {
 
+  override protected def init(modelClazz: Class[M]): Unit = {
+    JDBCService.db.createTableIfNotExist(modelClazz.getSimpleName, BeanHelper.getFields(modelClazz), "id")
+  }
+
   override protected def doGetById(id: String, request: RequestProtocol, success: => (M) => Unit, fail: => (String, String) => Unit): Unit =
     VertxStorageService.execute[M]({
       (Void) =>
-        JDBCService.db.getObject("SELECT * FROM %s WHERE id='%s'".format(tableName, id), modelClazz)
+        JDBCService.db.getObjectByPk(tableName, id, modelClazz)
     }, success, fail)
 
   override protected def doGetByCondition(condition: String, request: RequestProtocol, success: => (M) => Unit, fail: => (String, String) => Unit): Unit =
@@ -48,38 +53,45 @@ trait VertxStorageService[M <: IdModel] extends JDBCService[M] {
     }, success, fail)
 
   override protected def doSave(model: M, request: RequestProtocol, success: => (String) => Unit, fail: => (String, String) => Unit): Unit = {
-    val (sql, params) = packageSaveSql(model, request)
-    VertxStorageService.execute[Unit]({
-      JDBCService.db.update(sql, params)
-      null
-    }, { Unit => success}, fail)
+    var map = new java.util.HashMap[String, AnyRef]
+    BeanHelper.getValues(model).foreach(it => map += it._1 -> it._2.asInstanceOf[AnyRef])
+    VertxStorageService.execute[String]({
+      (Void) =>
+        JDBCService.db.save(tableName, map)
+        ""
+    }, success, fail)
   }
 
   override protected def doUpdate(id: String, model: M, request: RequestProtocol, success: => (String) => Unit, fail: => (String, String) => Unit): Unit = {
-    val (sql, params) = packageUpdateSql(id, model, request)
-    VertxStorageService.execute[Unit]({
-      JDBCService.db.update(sql, params.toArray)
-      null
-    }, { Unit => success}, fail)
+    var map = new java.util.HashMap[String, AnyRef]
+    BeanHelper.getValues(model).foreach(it => map += it._1 -> it._2.asInstanceOf[AnyRef])
+    VertxStorageService.execute[String]({
+      (Void) =>
+        JDBCService.db.update(tableName, id, BeanHelper.getValues(model).asInstanceOf[Map[String, AnyRef]])
+        ""
+    }, success, fail)
   }
 
   override protected def doDeleteById(id: String, request: RequestProtocol, success: => (Unit) => Unit, fail: => (String, String) => Unit): Unit =
-    VertxStorageService.execute[Unit]({
-      JDBCService.db.update("DELETE FROM %s WHERE id='%s'".format(tableName, id))
-      null
-    }, success, fail)
+    VertxStorageService.execute[String]({
+      (Void) =>
+        JDBCService.db.deleteByPk(tableName, id)
+        ""
+    }, { String => success()}, fail)
 
   override protected def doDeleteByCondition(condition: String, request: RequestProtocol, success: => (Unit) => Unit, fail: => (String, String) => Unit): Unit =
-    VertxStorageService.execute[Unit]({
-      JDBCService.db.update("DELETE FROM " + tableName + " WHERE " + condition)
-      null
-    }, success, fail)
+    VertxStorageService.execute[String]({
+      (Void) =>
+        JDBCService.db.update("DELETE FROM " + tableName + " WHERE " + condition)
+        ""
+    }, { String => success()}, fail)
 
   override protected def doDeleteAll(request: RequestProtocol, success: => (Unit) => Unit, fail: => (String, String) => Unit): Unit =
-    VertxStorageService.execute[Unit]({
-      JDBCService.db.update("DELETE FROM %s".format(tableName))
-      null
-    }, success, fail)
+    VertxStorageService.execute[String]({
+      (Void) =>
+        JDBCService.db.deleteAll(tableName)
+        ""
+    }, { String => success()}, fail)
 
 }
 
@@ -98,8 +110,8 @@ object VertxStorageService extends LazyLogging {
         try {
           future.complete(sqlExecute())
         } catch {
-          case e: Exception =>
-            logger.error("SQL execute error.", e)
+          case e =>
+            logger.error("SQL execute error", e)
             future.fail(e)
         }
       }
@@ -108,7 +120,6 @@ object VertxStorageService extends LazyLogging {
         if (e.succeeded()) {
           success(e.result())
         } else {
-          logger.error(StandardCode.FORBIDDEN_CODE, "SQL execute error", e.cause())
           if (fail != null) {
             fail(StandardCode.FORBIDDEN_CODE, "SQL execute error:" + e.cause().getMessage)
           }
