@@ -11,7 +11,7 @@ import org.scalatest._
 import scala.beans.BeanProperty
 
 
-class ServiceSpec extends FunSuite {
+class JDBCServiceSpec extends FunSuite {
 
   var testPath = this.getClass.getResource("/").getPath
   if (System.getProperties.getProperty("os.name").toUpperCase.indexOf("WINDOWS") != -1) {

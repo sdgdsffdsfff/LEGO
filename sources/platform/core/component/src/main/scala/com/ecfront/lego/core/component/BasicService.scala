@@ -14,6 +14,14 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
 
   logger.info( """Create Service: model: %s""".format(modelClazz.getSimpleName))
 
+  protected def convertToView(model: M, success: => M => Unit, fail: => (String, String) => Unit): Unit = {
+    success(model)
+  }
+
+  protected def convertToViews(model: List[M], success: => List[M] => Unit, fail: => (String, String) => Unit): Unit = {
+    success(model)
+  }
+
   protected def preGetById(id: String, request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
     success(null)
   }
@@ -22,12 +30,20 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     success(result)
   }
 
+
   def getById(id: String, request: RequestProtocol, success: => M => Unit, fail: => (String, String) => Unit = null): Unit = {
     preGetById(id, request, {
       preResult =>
         doGetById(id, request, {
           result =>
-            postGetById(result, preResult, request, success, fail)
+            if (result != null) {
+              convertToView(result, {
+                result =>
+                  postGetById(result, preResult, request, success, fail)
+              }, fail)
+            } else {
+              postGetById(result, preResult, request, success, fail)
+            }
         }, fail)
     }, {
       (code, message) =>
@@ -35,8 +51,11 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     })
   }
 
-  protected def doGetById(id: String, request: RequestProtocol, success: => M => Unit, fail: => (String, String) => Unit = null): Unit
+  protected def doGetById(id: String, request: RequestProtocol, success: => M => Unit, fail: => (String, String) => Unit = null): Unit = {
+    success(executeGetById(id, request))
+  }
 
+  protected def executeGetById(id: String, request: RequestProtocol): M = ???
 
   protected def preGetByCondition(condition: String, request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
     success(null)
@@ -51,7 +70,14 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
       preResult =>
         doGetByCondition(condition, request, {
           result =>
-            postGetByCondition(result, preResult, request, success, fail)
+            if (result != null) {
+              convertToView(result, {
+                result =>
+                  postGetByCondition(result, preResult, request, success, fail)
+              }, fail)
+            } else {
+              postGetByCondition(result, preResult, request, success, fail)
+            }
         }, fail)
     }, {
       (code, message) =>
@@ -59,8 +85,11 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     })
   }
 
-  protected def doGetByCondition(condition: String, request: RequestProtocol, success: => M => Unit, fail: => (String, String) => Unit = null): Unit
+  protected def doGetByCondition(condition: String, request: RequestProtocol, success: => M => Unit, fail: => (String, String) => Unit = null): Unit = {
+    success(executeGetByCondition(condition, request))
+  }
 
+  protected def executeGetByCondition(condition: String, request: RequestProtocol): M = ???
 
   protected def preFindAll(request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
     success(null)
@@ -75,7 +104,14 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
       preResult =>
         doFindAll(request, {
           result =>
-            postFindAll(result, preResult, request, success, fail)
+            if (result != null && result.nonEmpty) {
+              convertToViews(result, {
+                result =>
+                  postFindAll(result, preResult, request, success, fail)
+              }, fail)
+            } else {
+              postFindAll(result, preResult, request, success, fail)
+            }
         }, fail)
     }, {
       (code, message) =>
@@ -83,7 +119,11 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     })
   }
 
-  protected def doFindAll(request: RequestProtocol, success: => List[M] => Unit, fail: => (String, String) => Unit = null): Unit
+  protected def doFindAll(request: RequestProtocol, success: => List[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
+    success(executeFindAll(request))
+  }
+
+  protected def executeFindAll(request: RequestProtocol): List[M] = ???
 
   protected def prePageAll(pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
     success(null)
@@ -98,7 +138,15 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
       preResult =>
         doPageAll(pageNumber, pageSize, request, {
           result =>
-            postPageAll(result, preResult, pageNumber, pageSize, request, success, fail)
+            if (result != null && result.results != null && result.results.nonEmpty) {
+              convertToViews(result.results, {
+                newResults =>
+                  result.results = newResults
+                  postPageAll(result, preResult, pageNumber, pageSize, request, success, fail)
+              }, fail)
+            } else {
+              postPageAll(result, preResult, pageNumber, pageSize, request, success, fail)
+            }
         }, fail)
     }, {
       (code, message) =>
@@ -106,7 +154,11 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     })
   }
 
-  protected def doPageAll(pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit
+  protected def doPageAll(pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
+    success(executePageAll(pageNumber, pageSize, request))
+  }
+
+  protected def executePageAll(pageNumber: Long, pageSize: Long, request: RequestProtocol): PageModel[M] = ???
 
 
   protected def preFindByCondition(condition: String, request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
@@ -122,7 +174,14 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
       preResult =>
         doFindByCondition(condition, request, {
           result =>
-            postFindByCondition(result, preResult, request, success, fail)
+            if (result != null && result.nonEmpty) {
+              convertToViews(result, {
+                result =>
+                  postFindByCondition(result, preResult, request, success, fail)
+              }, fail)
+            } else {
+              postFindByCondition(result, preResult, request, success, fail)
+            }
         }, fail)
     }, {
       (code, message) =>
@@ -130,7 +189,11 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     })
   }
 
-  protected def doFindByCondition(condition: String, request: RequestProtocol, success: => List[M] => Unit, fail: => (String, String) => Unit = null): Unit
+  protected def doFindByCondition(condition: String, request: RequestProtocol, success: => List[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
+    success(executeFindByCondition(condition, request))
+  }
+
+  protected def executeFindByCondition(condition: String, request: RequestProtocol): List[M] = ???
 
   protected def prePageByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
     success(null)
@@ -145,7 +208,15 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
       preResult =>
         doPageByCondition(condition, pageNumber, pageSize, request, {
           result =>
-            postPageByCondition(result, preResult, pageNumber, pageSize, request, success, fail)
+            if (result != null && result.results != null && result.results.nonEmpty) {
+              convertToViews(result.results, {
+                newResults =>
+                  result.results = newResults
+                  postPageByCondition(result, preResult, pageNumber, pageSize, request, success, fail)
+              }, fail)
+            } else {
+              postPageByCondition(result, preResult, pageNumber, pageSize, request, success, fail)
+            }
         }, fail)
     }, {
       (code, message) =>
@@ -153,7 +224,11 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     })
   }
 
-  protected def doPageByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit
+  protected def doPageByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol, success: => PageModel[M] => Unit, fail: => (String, String) => Unit = null): Unit = {
+    success(executePageByCondition(condition, pageNumber, pageSize, request))
+  }
+
+  protected def executePageByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol): PageModel[M] = ???
 
 
   protected def preSave(model: M, request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
@@ -200,7 +275,11 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     })
   }
 
-  protected def doSave(model: M, request: RequestProtocol, success: => String => Unit, fail: => (String, String) => Unit = null): Unit
+  protected def doSave(model: M, request: RequestProtocol, success: => String => Unit, fail: => (String, String) => Unit = null): Unit = {
+    success(executeSave(model, request))
+  }
+
+  protected def executeSave(model: M, request: RequestProtocol): String = ???
 
   protected def preUpdate(id: String, model: M, request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
     success(null)
@@ -238,7 +317,11 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     })
   }
 
-  protected def doUpdate(id: String, model: M, request: RequestProtocol, success: => String => Unit, fail: => (String, String) => Unit = null): Unit
+  protected def doUpdate(id: String, model: M, request: RequestProtocol, success: => String => Unit, fail: => (String, String) => Unit = null): Unit = {
+    success(executeUpdate(id, model, request))
+  }
+
+  protected def executeUpdate(id: String, model: M, request: RequestProtocol): String = ???
 
   protected def preDeleteById(id: String, request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
     success(null)
@@ -261,7 +344,11 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     })
   }
 
-  protected def doDeleteById(id: String, request: RequestProtocol, success: => Unit => Unit, fail: => (String, String) => Unit = null): Unit
+  protected def doDeleteById(id: String, request: RequestProtocol, success: => Unit => Unit, fail: => (String, String) => Unit = null): Unit = {
+    success(executeDeleteById(id, request))
+  }
+
+  protected def executeDeleteById(id: String, request: RequestProtocol): Unit = ???
 
   protected def preDeleteByCondition(condition: String, request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
     success(null)
@@ -284,7 +371,11 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     })
   }
 
-  protected def doDeleteByCondition(condition: String, request: RequestProtocol, success: => Unit => Unit, fail: => (String, String) => Unit = null): Unit
+  protected def doDeleteByCondition(condition: String, request: RequestProtocol, success: => Unit => Unit, fail: => (String, String) => Unit = null): Unit = {
+    success(executeDeleteByCondition(condition, request))
+  }
+
+  protected def executeDeleteByCondition(condition: String, request: RequestProtocol): Unit = ???
 
 
   protected def preDeleteAll(request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
@@ -308,11 +399,16 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     })
   }
 
-  protected def doDeleteAll(request: RequestProtocol, success: => Unit => Unit, fail: => (String, String) => Unit = null): Unit
+  protected def doDeleteAll(request: RequestProtocol, success: => Unit => Unit, fail: => (String, String) => Unit = null): Unit = {
+    success(executeDeleteAll(request))
+  }
+
+  protected def executeDeleteAll(request: RequestProtocol): Unit = ???
 
   protected def init(modelClazz: Class[M]): Unit
 
   init(modelClazz)
+
 }
 
 
