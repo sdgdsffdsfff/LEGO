@@ -1,7 +1,7 @@
 package com.ecfront.lego.rbac.foundation
 
 import com.ecfront.common.Ignore
-import com.ecfront.lego.core.foundation.{SecureModel, AppSecureModel}
+import com.ecfront.lego.core.foundation.{AppSecureModel, SecureModel}
 
 import scala.beans.BeanProperty
 
@@ -25,7 +25,8 @@ case class Organization() extends AppSecureModel {
 case class Role() extends AppSecureModel {
   @BeanProperty var code: String = _
   @BeanProperty var name: String = _
-  @Ignore @BeanProperty var resources: List[String]  = _
+  @Ignore
+  @BeanProperty var resourceIds: List[String] = _
 }
 
 /**
@@ -44,10 +45,12 @@ case class Account() extends AppSecureModel {
   @BeanProperty var userName: String = _
   @BeanProperty var password: String = _
   @BeanProperty var email: String = _
-  @Ignore @BeanProperty var organizations: List[String] = _
-  @Ignore @BeanProperty var roles: List[String] = _
+  @Ignore
+  @BeanProperty var organizationIds: List[String] = _
+  @Ignore
+  @BeanProperty var roleIds: List[String] = _
   @BeanProperty var extId: String = _
-  @BeanProperty var extInfo: Map[String,AnyRef] = _
+  @BeanProperty var extInfo: String = _
 }
 
 /**

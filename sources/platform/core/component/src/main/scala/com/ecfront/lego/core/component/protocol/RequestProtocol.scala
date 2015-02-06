@@ -1,5 +1,7 @@
 package com.ecfront.lego.core.component.protocol
 
+import com.ecfront.lego.core.foundation.{AppSecureModel, SecureModel}
+
 case class RequestProtocol(
                             cId: String,
                             userId: String,
@@ -11,5 +13,5 @@ case class RequestProtocol(
 }
 
 object RequestProtocol {
-  def createBySystem = RequestProtocol("", "__system", "LEGO")
+  def createBySystem = RequestProtocol(System.nanoTime() + "", SecureModel.SYSTEM_USER_FLAG, AppSecureModel.LEGO_APP_FLAG)
 }

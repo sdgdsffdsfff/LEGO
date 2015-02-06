@@ -14,12 +14,12 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
 
   logger.info( """Create Service: model: %s""".format(modelClazz.getSimpleName))
 
-  protected def convertToView(model: M, success: => M => Unit, fail: => (String, String) => Unit): Unit = {
+  protected def convertToView(model: M, request: RequestProtocol, success: => M => Unit, fail: => (String, String) => Unit): Unit = {
     success(model)
   }
 
-  protected def convertToViews(model: List[M], success: => List[M] => Unit, fail: => (String, String) => Unit): Unit = {
-    success(model)
+  protected def convertToViews(models: List[M], request: RequestProtocol, success: => List[M] => Unit, fail: => (String, String) => Unit): Unit = {
+    success(models)
   }
 
   protected def preGetById(id: String, request: RequestProtocol, success: => Any => Unit, fail: => (String, String) => Unit = null): Unit = {
@@ -37,7 +37,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
         doGetById(id, request, {
           result =>
             if (result != null) {
-              convertToView(result, {
+              convertToView(result, request, {
                 result =>
                   postGetById(result, preResult, request, success, fail)
               }, fail)
@@ -71,7 +71,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
         doGetByCondition(condition, request, {
           result =>
             if (result != null) {
-              convertToView(result, {
+              convertToView(result, request, {
                 result =>
                   postGetByCondition(result, preResult, request, success, fail)
               }, fail)
@@ -105,7 +105,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
         doFindAll(request, {
           result =>
             if (result != null && result.nonEmpty) {
-              convertToViews(result, {
+              convertToViews(result, request, {
                 result =>
                   postFindAll(result, preResult, request, success, fail)
               }, fail)
@@ -139,7 +139,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
         doPageAll(pageNumber, pageSize, request, {
           result =>
             if (result != null && result.results != null && result.results.nonEmpty) {
-              convertToViews(result.results, {
+              convertToViews(result.results, request, {
                 newResults =>
                   result.results = newResults
                   postPageAll(result, preResult, pageNumber, pageSize, request, success, fail)
@@ -175,7 +175,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
         doFindByCondition(condition, request, {
           result =>
             if (result != null && result.nonEmpty) {
-              convertToViews(result, {
+              convertToViews(result, request, {
                 result =>
                   postFindByCondition(result, preResult, request, success, fail)
               }, fail)
@@ -209,7 +209,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
         doPageByCondition(condition, pageNumber, pageSize, request, {
           result =>
             if (result != null && result.results != null && result.results.nonEmpty) {
-              convertToViews(result.results, {
+              convertToViews(result.results, request, {
                 newResults =>
                   result.results = newResults
                   postPageByCondition(result, preResult, pageNumber, pageSize, request, success, fail)
@@ -241,27 +241,24 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
 
   def save(model: M, request: RequestProtocol, success: => String => Unit, fail: => (String, String) => Unit = null): Unit = {
     model match {
-      case tModel: AppSecureModel =>
-        if (tModel.id == null) {
-          tModel.id = UUID.randomUUID().toString
-        }
-        tModel.appId = request.appId
-        tModel.createTime = System.currentTimeMillis()
-        tModel.createUser = request.userId
-        tModel.updateTime = System.currentTimeMillis()
-        tModel.updateUser = request.userId
-      case tModel: SecureModel =>
-        if (tModel.id == null) {
-          tModel.id = UUID.randomUUID().toString
-        }
-        tModel.createTime = System.currentTimeMillis()
-        tModel.createUser = request.userId
-        tModel.updateTime = System.currentTimeMillis()
-        tModel.updateUser = request.userId
       case tModel: IdModel =>
         if (tModel.id == null) {
           tModel.id = UUID.randomUUID().toString
         }
+      case _ =>
+    }
+    model match {
+      case tModel: SecureModel =>
+        tModel.createTime = System.currentTimeMillis()
+        tModel.createUser = request.userId
+        tModel.updateTime = System.currentTimeMillis()
+        tModel.updateUser = request.userId
+      case _ =>
+    }
+    model match {
+      case tModel: AppSecureModel =>
+        tModel.appId = request.appId
+      case _ =>
     }
     preSave(model, request, {
       preResult =>
@@ -294,13 +291,15 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
       oldModel =>
         BeanHelper.copyProperties(oldModel, model)
         model match {
-          case tModel: AppSecureModel =>
+          case tModel: SecureModel if !isSystem(request) =>
+            tModel.updateTime = System.currentTimeMillis()
+            tModel.updateUser = request.userId
+          case _ =>
+        }
+        model match {
+          case tModel: AppSecureModel if !isSystem(request) =>
             tModel.appId = request.appId
-            tModel.updateTime = System.currentTimeMillis()
-            tModel.updateUser = request.userId
-          case tModel: SecureModel =>
-            tModel.updateTime = System.currentTimeMillis()
-            tModel.updateUser = request.userId
+          case _ =>
         }
         preUpdate(id, model, request, {
           preResult =>
@@ -404,6 +403,10 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
   }
 
   protected def executeDeleteAll(request: RequestProtocol): Unit = ???
+
+  protected def isSystem(request: RequestProtocol): Boolean = {
+    AppSecureModel.LEGO_APP_FLAG == request.appId
+  }
 
   protected def init(modelClazz: Class[M]): Unit
 

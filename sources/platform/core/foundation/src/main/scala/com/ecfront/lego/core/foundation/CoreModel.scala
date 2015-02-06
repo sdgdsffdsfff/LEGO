@@ -9,8 +9,9 @@ abstract class IdModel {
   @BeanProperty var id: String = _
 }
 
-object IdModel{
+object IdModel {
   val ID_FLAG = "id"
+  val SPLIT_FLAG = "@"
 }
 
 abstract class SecureModel extends IdModel {
@@ -20,8 +21,17 @@ abstract class SecureModel extends IdModel {
   @BeanProperty var updateTime: Long = _
 }
 
+object SecureModel {
+  val SYSTEM_USER_FLAG = "system"
+}
+
 abstract class AppSecureModel extends SecureModel {
   @BeanProperty var appId: String = _
+}
+
+object AppSecureModel {
+  val APP_ID_FLAG = "appId"
+  val LEGO_APP_FLAG = "LEGO"
 }
 
 case class PageModel[M](
@@ -51,5 +61,13 @@ object PageModel {
       tmp.get("recordTotal").asLong(),
       results.toList
     )
+  }
+}
+
+object ModelConvertor {
+
+  implicit def getModelName[E](model: E) = new {
+    def _name =
+      model.getClass.getSimpleName.substring(0, model.getClass.getSimpleName.length - 1)
   }
 }

@@ -102,7 +102,7 @@ object VertxStorageService extends LazyLogging {
         try {
           future.complete(sqlExecute())
         } catch {
-          case e:Exception =>
+          case e: Exception =>
             logger.error("SQL execute error", e)
             future.fail(e)
         }
