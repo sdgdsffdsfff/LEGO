@@ -1,14 +1,14 @@
 package com.ecfront.lego.core.component
 
-import java.util.concurrent.CountDownLatch
-
 import com.ecfront.lego.core.component.protocol.RequestProtocol
-import com.ecfront.lego.core.component.storage.VertxStorageService
+import com.ecfront.lego.core.component.protocol.Response.isSuccess
+import com.ecfront.lego.core.component.storage.JDBCService
 import com.ecfront.lego.core.foundation.SecureModel
-import io.vertx.core.Vertx
 import org.scalatest._
 
 import scala.beans.BeanProperty
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 
 class JDBCServiceSpec extends FunSuite {
@@ -20,116 +20,107 @@ class JDBCServiceSpec extends FunSuite {
 
   test("JDBC服务测试") {
 
-    val w = new CountDownLatch(1)
-
-    VertxStorageService.init(Vertx.vertx(), testPath)
+    JDBCService.init(testPath)
 
     val request = RequestProtocol("0000", "jzy", "test_app")
 
     //-------------------save--------------------------------------------
     val model = TestModel()
-    model.name="张三"
-    model.bool=true
-    model.age=14
+    model.name = "张三"
+    model.bool = true
+    model.age = 14
     model.id = "id001"
-    TestService.save(model, request, {
-      Unit =>
-        //-------------------getById--------------------------------------------
-        TestService.getById("id001", request, {
-          model =>
-            assert(model.name == "张三")
-            assert(model.bool)
-            assert(model.createUser == "jzy")
-            assert(model.updateUser == "jzy")
-            assert(model.createTime != null)
-            assert(model.updateTime != null)
-            //--------------------update-------------------------------------------
-            model.name = "haha"
-            model.bool = false
-            TestService.update("id001", model, request, {
-              id =>
-                assert(model.name == "haha")
-                assert(!model.bool)
-                //--------------------getByCondition-------------------------------------------
-                TestService.getByCondition("id='%s' AND name='%s'".format("id001", "haha"), request, {
-                  model =>
-                    assert(model.name == "haha")
-                    //---------------------findAll------------------------------------------
-                    TestService.findAll(request, {
-                      result =>
-                        assert(result.size == 1)
-                        assert(result(0).name == "haha")
-                        //---------------------pageAll------------------------------------------
-                        model.id = null
-                        TestService.save(model, request, {
-                          Unit =>
-                            model.id = null
-                            TestService.save(model, request, {
-                              Unit =>
-                                model.id = null
-                                TestService.save(model, request, {
-                                  Unit =>
-                                    model.id = null
-                                    model.name = "last"
-                                    TestService.save(model, request, {
-                                      Unit =>
-                                        //---------------------------------------------------------------
-                                        TestService.pageAll(2, 2, request, {
-                                          pages =>
-                                            assert(pages.getPageNumber == 2)
-                                            assert(pages.getPageSize == 2)
-                                            assert(pages.getPageTotal == 3)
-                                            assert(pages.getRecordTotal == 5)
-                                            //-----------------------pageByCondition----------------------------------------
-                                            TestService.pageByCondition("name = '%s' ORDER BY createTime desc".format("haha"), 1, 3, request, {
-                                              pages =>
-                                                assert(pages.getPageNumber == 1)
-                                                assert(pages.getPageSize == 3)
-                                                assert(pages.getPageTotal == 2)
-                                                assert(pages.getRecordTotal == 4)
-                                                //------------------------deleteById---------------------------------------
-                                                TestService.deleteById(pages.getResults.last.id, request, {
-                                                  Unit =>
-                                                    TestService.findByCondition("id='%s'".format(pages.getResults.head.id), request, {
-                                                      result =>
-                                                        assert(result.size == 1)
-                                                        TestService.findByCondition("id='%s'".format(pages.getResults.last.id), request, {
-                                                          result =>
-                                                            assert(result.size == 0)
-                                                            //------------------------deleteAll---------------------------------------
-                                                            TestService.deleteAll(request, {
-                                                              Unit =>
-                                                                TestService.findAll(request, {
-                                                                  Unit =>
-                                                                    assert(result.size == 0)
-
-                                                                    w.countDown()
-                                                                })
-                                                            })
-                                                        })
-                                                    })
-                                                })
-                                            })
-                                        })
-                                    })
-                                })
-                            })
-                        })
-                    })
-                })
-            })
-        })
-    })
-
-    w.await()
+    Await.result(TestService.save(model, request), Duration.Inf)
+    var resultSingle = Await.result(TestService.getById("id001", request), Duration.Inf)
+    if (resultSingle) {
+      assert(resultSingle.body.name == "张三")
+      assert(resultSingle.body.bool)
+      assert(resultSingle.body.createUser == "jzy")
+      assert(resultSingle.body.updateUser == "jzy")
+      assert(resultSingle.body.createTime != null)
+      assert(resultSingle.body.updateTime != null)
+    } else {
+      assert(1 != 1)
+    }
+    model.name = "haha"
+    model.bool = false
+    Await.result(TestService.update("id001", model, request), Duration.Inf)
+    resultSingle = Await.result(TestService.getById("id001", request), Duration.Inf)
+    if (resultSingle) {
+      assert(resultSingle.body.name == "haha")
+      assert(resultSingle.body.bool == false)
+    } else {
+      assert(1 != 1)
+    }
+    resultSingle = Await.result(TestService.getByCondition("id='%s' AND name='%s'".format("id001", "haha"), request), Duration.Inf)
+    if (resultSingle) {
+      assert(resultSingle.body.name == "haha")
+    } else {
+      assert(1 != 1)
+    }
+    var resultList = Await.result(TestService.findAll(request), Duration.Inf)
+    if (resultList) {
+      assert(resultList.body.size == 1)
+      assert(resultList.body(0).name == "haha")
+    } else {
+      assert(1 != 1)
+    }
+    model.id = null
+    Await.result(TestService.save(model, request), Duration.Inf)
+    model.id = null
+    Await.result(TestService.save(model, request), Duration.Inf)
+    model.id = null
+    Await.result(TestService.save(model, request), Duration.Inf)
+    model.id = null
+    model.name = "last"
+    Await.result(TestService.save(model, request), Duration.Inf)
+    var resultPage = Await.result(TestService.pageAll(2, 2, request), Duration.Inf)
+    if (resultPage) {
+      assert(resultPage.body.getPageNumber == 2)
+      assert(resultPage.body.getPageSize == 2)
+      assert(resultPage.body.getPageTotal == 3)
+      assert(resultPage.body.getRecordTotal == 5)
+    } else {
+      assert(1 != 1)
+    }
+    resultPage = Await.result(TestService.pageByCondition("name = '%s' ORDER BY createTime desc".format("haha"), 1, 3, request), Duration.Inf)
+    if (resultPage) {
+      assert(resultPage.body.getPageNumber == 1)
+      assert(resultPage.body.getPageSize == 3)
+      assert(resultPage.body.getPageTotal == 2)
+      assert(resultPage.body.getRecordTotal == 4)
+    } else {
+      assert(1 != 1)
+    }
+    Await.result(TestService.deleteById(resultPage.body.results.last.id, request), Duration.Inf)
+    resultList = Await.result(TestService.findByCondition("id='%s'".format(resultPage.body.results.head.id), request), Duration.Inf)
+    if (resultList) {
+      assert(resultList.body.size == 1)
+    } else {
+      assert(1 != 1)
+    }
+    resultList = Await.result(TestService.findByCondition("id='%s'".format(resultPage.body.results.last.id), request), Duration.Inf)
+    if (resultList) {
+      assert(resultList.body.size == 0)
+    } else {
+      assert(1 != 1)
+    }
+    Await.result(TestService.deleteAll(request), Duration.Inf)
+    resultList = Await.result(TestService.findAll(request), Duration.Inf)
+    if (resultList) {
+      assert(resultList.body.size == 0)
+    } else {
+      assert(1 != 1)
+    }
   }
 }
 
-object TestService extends VertxStorageService[TestModel]
+object TestService extends JDBCService[TestModel]
 
-case class TestModel() extends SecureModel{
-  @BeanProperty var name: String=_
-  @BeanProperty var bool: Boolean=_
-  @BeanProperty @com.ecfront.common.Ignore var age: Int=_
+case class TestModel() extends SecureModel {
+  @BeanProperty var name: String = _
+  @BeanProperty var bool: Boolean = _
+  @BeanProperty
+  @com.ecfront.common.Ignore var age: Int = _
 }
 

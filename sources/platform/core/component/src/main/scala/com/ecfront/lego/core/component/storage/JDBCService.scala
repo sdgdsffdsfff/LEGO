@@ -14,6 +14,10 @@ trait JDBCService[M <: IdModel] extends CoreService[M] {
 
   protected val tableName = modelClazz.getSimpleName
 
+  override protected def init(modelClazz: Class[M]): Unit = {
+    JDBCService.db.createTableIfNotExist(modelClazz.getSimpleName, BeanHelper.getFields(modelClazz), "id")
+  }
+
   override protected def executeGetById(id: String, request: RequestProtocol): M = {
     executeGetByCondition(s"${IdModel.ID_FLAG} = '$id'", request)
   }
@@ -88,30 +92,34 @@ trait JDBCService[M <: IdModel] extends CoreService[M] {
     }
   }
 
-  override protected def executeDeleteById(id: String, request: RequestProtocol): Unit = {
+  override protected def executeDeleteById(id: String, request: RequestProtocol): String = {
     executeDeleteByCondition(s"${IdModel.ID_FLAG} = '$id'", request)
+    ""
   }
 
-  protected def executeDeleteByIdWithoutTransaction(id: String, request: RequestProtocol): Unit = {
+  protected def executeDeleteByIdWithoutTransaction(id: String, request: RequestProtocol): String = {
     executeDeleteByConditionWithoutTransaction(s"${IdModel.ID_FLAG} = '$id'", request)
+    ""
   }
 
-  override protected def executeDeleteAll(request: RequestProtocol): Unit = {
+  override protected def executeDeleteAll(request: RequestProtocol): List[String] = {
     executeDeleteByCondition("1=1", request)
   }
 
-  protected def executeDeleteAllWithoutTransaction(request: RequestProtocol): Unit = {
+  protected def executeDeleteAllWithoutTransaction(request: RequestProtocol): List[String] = {
     executeDeleteByConditionWithoutTransaction("1=1", request)
   }
 
-  override protected def executeDeleteByCondition(condition: String, request: RequestProtocol): Unit = {
+  override protected def executeDeleteByCondition(condition: String, request: RequestProtocol): List[String] = {
     JDBCService.db.open()
     executeDeleteByConditionWithoutTransaction(condition, request)
     JDBCService.db.commit()
+    List()
   }
 
-  protected def executeDeleteByConditionWithoutTransaction(condition: String, request: RequestProtocol): Unit = {
+  protected def executeDeleteByConditionWithoutTransaction(condition: String, request: RequestProtocol): List[String] = {
     JDBCService.db.update("DELETE FROM " + tableName + " WHERE " + condition + appendAuth(request))
+    List()
   }
 
   protected def executeDeleteManyToManyRel(relTableName: String, condition: String, request: RequestProtocol): Unit = {

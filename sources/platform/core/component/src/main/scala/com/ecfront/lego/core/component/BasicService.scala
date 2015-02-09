@@ -8,7 +8,7 @@ import com.ecfront.lego.core.component.protocol.Response.isSuccess
 import com.ecfront.lego.core.component.protocol.{RequestProtocol, Response, ResponseDTO}
 import com.ecfront.lego.core.foundation.{AppSecureModel, IdModel, PageModel, SecureModel}
 import com.typesafe.scalalogging.slf4j.LazyLogging
-
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait BasicService[M <: AnyRef] extends LazyLogging {
