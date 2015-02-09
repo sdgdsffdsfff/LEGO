@@ -1,4 +1,4 @@
-LEGO
+LEGO (building)
 ===
 ###Distributed Services platform
 
