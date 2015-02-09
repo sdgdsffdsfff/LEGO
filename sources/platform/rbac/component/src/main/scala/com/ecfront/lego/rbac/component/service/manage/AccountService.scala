@@ -1,18 +1,18 @@
 package com.ecfront.lego.rbac.component.service.manage
 
-import com.ecfront.lego.core.component.protocol.RequestProtocol
-import com.ecfront.lego.core.component.storage.{JDBCService, VertxStorageService}
+import com.ecfront.lego.core.component.protocol.{ResponseDTO, RequestProtocol,Response}
+import com.ecfront.lego.core.component.storage.{JDBCService}
 import com.ecfront.lego.core.foundation.IdModel
 import com.ecfront.lego.rbac.foundation.Account
 
-object AccountService extends VertxStorageService[Account] with ManageService {
+object AccountService extends JDBCService[Account] with ManageService {
 
-  override protected def preSave(model: Account, request: RequestProtocol, success: => (Any) => Unit, fail: => (String, String) => Unit): Unit = {
+  override protected def preSave(model: Account, request: RequestProtocol): ResponseDTO[Any] = {
     model.id = model.userId + IdModel.SPLIT_FLAG + (if (!isSystem(request) || model.appId == null) request.appId else model.appId)
-    success(model)
+    Response.success(model)
   }
 
-  override protected def convertToView(model: Account, request: RequestProtocol, success: => (Account) => Unit, fail: => (String, String) => Unit): Unit = {
+  override protected def convertToView(model: Account, request: RequestProtocol): ResponseDTO[Account] = {
     RoleService.findRoleByAccountId(model.id, request, {
       roles =>
         model.roleIds = roles.map(_.id)

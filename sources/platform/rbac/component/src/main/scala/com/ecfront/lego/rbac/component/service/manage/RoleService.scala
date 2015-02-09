@@ -1,19 +1,22 @@
 package com.ecfront.lego.rbac.component.service.manage
 
-import com.ecfront.lego.core.component.protocol.RequestProtocol
-import com.ecfront.lego.core.component.storage.{JDBCService, VertxStorageService}
+import com.ecfront.lego.core.component.protocol.{ResponseDTO, RequestProtocol,Response}
+import com.ecfront.lego.core.component.storage.JDBCService
 import com.ecfront.lego.core.foundation.IdModel
 import com.ecfront.lego.core.foundation.ModelConvertor._
 import com.ecfront.lego.rbac.foundation.{Account, Role}
 
-object RoleService extends VertxStorageService[Role] with ManageService {
+import scala.concurrent.Future
 
-  override protected def preSave(model: Role, request: RequestProtocol, success: => (Any) => Unit, fail: => (String, String) => Unit): Unit = {
+object RoleService extends JDBCService[Role] with ManageService {
+
+  override protected def preSave(model: Role, request: RequestProtocol): ResponseDTO[Any] = {
     model.id = model.code + IdModel.SPLIT_FLAG + (if (!isSystem(request) || model.appId == null) request.appId else model.appId)
-    success(model)
+    Response.success(model)
   }
 
-  override protected def convertToView(model: Role, request: RequestProtocol, success: => (Role) => Unit, fail: => (String, String) => Unit): Unit = {
+  override protected def convertToView(model: Role, request: RequestProtocol): ResponseDTO[Role] = {
+    ResourceService.findResourceByRoleId(model.id, request)
     ResourceService.findResourceByRoleId(model.id, request, {
       resources =>
         model.resourceIds = resources.map(_.id)
@@ -21,13 +24,13 @@ object RoleService extends VertxStorageService[Role] with ManageService {
     }, fail)
   }
 
-  def findRoleByAccountId(accountId: String, request: RequestProtocol, success: => List[Role] => Unit, fail: => (String, String) => Unit): Unit = {
+  def findRoleByAccountId(accountId: String, request: RequestProtocol): Future[ResponseDTO[List[Role]]] = {
     findByCondition(
       s"${IdModel.ID_FLAG} in" +
         s" (SELECT ${Role._name + "_" + IdModel.ID_FLAG} FROM $REL_ROLE_ACCOUNT " +
         s"WHERE ${Account._name + "_" + IdModel.ID_FLAG} = '$accountId')" +
         s" ${appendAuth(request)}",
-      request, success, fail)
+      request)
   }
 
   override protected def executeSave(model: Role, request: RequestProtocol): String = {
