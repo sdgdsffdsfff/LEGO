@@ -1,31 +1,28 @@
 package com.ecfront.lego.rbac.component.service.manage
 
-import com.ecfront.lego.core.component.protocol.{ResponseDTO, RequestProtocol,Response}
+import com.ecfront.lego.core.component.protocol.RequestProtocol
 import com.ecfront.lego.core.component.storage.JDBCService
 import com.ecfront.lego.core.foundation.IdModel
 import com.ecfront.lego.core.foundation.ModelConvertor._
 import com.ecfront.lego.rbac.foundation.{Account, Role}
 
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 object RoleService extends JDBCService[Role] with ManageService {
 
-  override protected def preSave(model: Role, request: RequestProtocol): ResponseDTO[Any] = {
+  override protected def preSave(model: Role, request: RequestProtocol): (Boolean, Any) = {
     model.id = model.code + IdModel.SPLIT_FLAG + (if (!isSystem(request) || model.appId == null) request.appId else model.appId)
-    Response.success(model)
+    (true, model)
   }
 
-  override protected def convertToView(model: Role, request: RequestProtocol): ResponseDTO[Role] = {
-    ResourceService.findResourceByRoleId(model.id, request)
-    ResourceService.findResourceByRoleId(model.id, request, {
-      resources =>
-        model.resourceIds = resources.map(_.id)
-        success(model)
-    }, fail)
+  override protected def convertToView(model: Role, request: RequestProtocol): Option[Role] = {
+    model.resourceIds = Await.result(ResourceService.findResourceByRoleId(model.id, request), Duration.Inf).get.map(_.id)
+    Some(model)
   }
 
-  def findRoleByAccountId(accountId: String, request: RequestProtocol): Future[ResponseDTO[List[Role]]] = {
-    findByCondition(
+  def findRoleByAccountId(accountId: String, request: RequestProtocol): Future[Option[List[Role]]] = Future {
+    executeFindByCondition(
       s"${IdModel.ID_FLAG} in" +
         s" (SELECT ${Role._name + "_" + IdModel.ID_FLAG} FROM $REL_ROLE_ACCOUNT " +
         s"WHERE ${Account._name + "_" + IdModel.ID_FLAG} = '$accountId')" +
@@ -33,27 +30,28 @@ object RoleService extends JDBCService[Role] with ManageService {
       request)
   }
 
-  override protected def executeSave(model: Role, request: RequestProtocol): String = {
+  override protected def doSave(model: Role, request: RequestProtocol): Option[String] = {
     JDBCService.db.open()
-    executeSaveManyToManyRel(model.id, model.resourceIds, REL_ROLE_RESOURCE, request)
-    executeSaveWithoutTransaction(model, request)
+    doSaveManyToManyRel(model.id, model.resourceIds, REL_ROLE_RESOURCE, request)
+    val result = doSaveWithoutTransaction(model, request)
     JDBCService.db.commit()
-    model.id
+    result
   }
 
-  override protected def executeUpdate(id: String, model: Role, request: RequestProtocol): String = {
+  override protected def doUpdate(id: String, model: Role, request: RequestProtocol): Option[String] = {
     JDBCService.db.open()
-    executeUpdateManyToManyRel(id, model.resourceIds, REL_ROLE_RESOURCE, request)
-    executeUpdateWithoutTransaction(id, model, request)
+    doUpdateManyToManyRel(id, model.resourceIds, REL_ROLE_RESOURCE, request)
+    val result = doUpdateWithoutTransaction(id, model, request)
     JDBCService.db.commit()
-    model.id
+    result
   }
 
-  override protected def executeDeleteByCondition(condition: String, request: RequestProtocol): Unit = {
+  override protected def doDeleteByCondition(condition: String, request: RequestProtocol): Option[List[String]] = {
     JDBCService.db.open()
-    executeDeleteManyToManyRel(REL_ROLE_RESOURCE, condition, request)
-    executeDeleteByConditionWithoutTransaction(condition, request)
+    doDeleteManyToManyRel(REL_ROLE_RESOURCE, condition, request)
+    val result = doDeleteByConditionWithoutTransaction(condition, request)
     JDBCService.db.commit()
+    result
   }
 
 }

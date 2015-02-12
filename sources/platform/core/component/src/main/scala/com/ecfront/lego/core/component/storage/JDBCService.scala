@@ -18,44 +18,44 @@ trait JDBCService[M <: IdModel] extends CoreService[M] {
     JDBCService.db.createTableIfNotExist(modelClazz.getSimpleName, BeanHelper.getFields(modelClazz), "id")
   }
 
-  override protected def executeGetById(id: String, request: RequestProtocol): M = {
-    executeGetByCondition(s"${IdModel.ID_FLAG} = '$id'", request)
+  override protected def doGetById(id: String, request: RequestProtocol): Option[M] = {
+    doGetByCondition(s"${IdModel.ID_FLAG} = '$id'", request)
   }
 
-  override protected def executeGetByCondition(condition: String, request: RequestProtocol): M = {
-    JDBCService.db.getObject("SELECT * FROM " + tableName + " WHERE " + condition + appendAuth(request), modelClazz)
+  override protected def doGetByCondition(condition: String, request: RequestProtocol): Option[M] = {
+    Some(JDBCService.db.getObject("SELECT * FROM " + tableName + " WHERE " + condition + appendAuth(request), modelClazz))
   }
 
-  override protected def executeFindAll(request: RequestProtocol): List[M] = {
-    executeFindByCondition("1=1", request)
+  override protected def doFindAll(request: RequestProtocol): Option[List[M]] = {
+    doFindByCondition("1=1", request)
   }
 
-  override protected def executeFindByCondition(condition: String, request: RequestProtocol): List[M] = {
-    JDBCService.db.findObjects("SELECT * FROM " + tableName + " WHERE " + condition + appendAuth(request), modelClazz).toList
+  override protected def doFindByCondition(condition: String, request: RequestProtocol): Option[List[M]] = {
+    Some(JDBCService.db.findObjects("SELECT * FROM " + tableName + " WHERE " + condition + appendAuth(request), modelClazz).toList)
   }
 
-  override protected def executePageAll(pageNumber: Long, pageSize: Long, request: RequestProtocol): PageModel[M] = {
-    executePageByCondition("1=1", pageNumber, pageSize, request)
+  override protected def doPageAll(pageNumber: Long, pageSize: Long, request: RequestProtocol): Option[PageModel[M]] = {
+    doPageByCondition("1=1", pageNumber, pageSize, request)
   }
 
-  override protected def executePageByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol): PageModel[M] = {
+  override protected def doPageByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol): Option[PageModel[M]] = {
     val page = JDBCService.db.findObjects("SELECT * FROM " + tableName + " WHERE " + condition + appendAuth(request), pageNumber, pageSize, modelClazz)
-    PageModel(page.pageNumber, page.pageSize, page.pageTotal, page.recordTotal, page.objects.toList)
+    Some(PageModel(page.pageNumber, page.pageSize, page.pageTotal, page.recordTotal, page.objects.toList))
   }
 
-  override protected def executeSave(model: M, request: RequestProtocol): String = {
+  override protected def doSave(model: M, request: RequestProtocol): Option[String] = {
     JDBCService.db.open()
-    executeSaveWithoutTransaction(model, request)
+    doSaveWithoutTransaction(model, request)
     JDBCService.db.commit()
-    model.id
+    Some(model.id)
   }
 
-  protected def executeSaveWithoutTransaction(model: M, request: RequestProtocol): String = {
+  protected def doSaveWithoutTransaction(model: M, request: RequestProtocol): Option[String] = {
     JDBCService.db.save(tableName, BeanHelper.getValues(model).asInstanceOf[Map[String, AnyRef]])
-    model.id
+    Some(model.id)
   }
 
-  protected def executeSaveManyToManyRel(mainId: String, relIds: List[String], relTableName: String, request: RequestProtocol): Unit = {
+  protected def doSaveManyToManyRel(mainId: String, relIds: List[String], relTableName: String, request: RequestProtocol): Unit = {
     val (mainField, relField) = JDBCService.parseManyToManyRelTableFields(relTableName, tableName)
     if (relIds != null && relIds.nonEmpty) {
       val params = ArrayBuffer[Array[AnyRef]]()
@@ -67,19 +67,19 @@ trait JDBCService[M <: IdModel] extends CoreService[M] {
     }
   }
 
-  override protected def executeUpdate(id: String, model: M, request: RequestProtocol): String = {
+  override protected def doUpdate(id: String, model: M, request: RequestProtocol): Option[String] = {
     JDBCService.db.open()
-    executeUpdateWithoutTransaction(id, model, request)
+    doUpdateWithoutTransaction(id, model, request)
     JDBCService.db.commit()
-    model.id
+    Some(model.id)
   }
 
-  protected def executeUpdateWithoutTransaction(id: String, model: M, request: RequestProtocol): String = {
+  protected def doUpdateWithoutTransaction(id: String, model: M, request: RequestProtocol): Option[String] = {
     JDBCService.db.update(tableName, id, BeanHelper.getValues(model).asInstanceOf[Map[String, AnyRef]])
-    model.id
+    Some(model.id)
   }
 
-  protected def executeUpdateManyToManyRel(mainId: String, relIds: List[String], relTableName: String, request: RequestProtocol): Unit = {
+  protected def doUpdateManyToManyRel(mainId: String, relIds: List[String], relTableName: String, request: RequestProtocol): Unit = {
     val (mainField, relField) = JDBCService.parseManyToManyRelTableFields(relTableName, tableName)
     if (relIds != null && relIds.nonEmpty) {
       val params = ArrayBuffer[Array[AnyRef]]()
@@ -92,37 +92,37 @@ trait JDBCService[M <: IdModel] extends CoreService[M] {
     }
   }
 
-  override protected def executeDeleteById(id: String, request: RequestProtocol): String = {
-    executeDeleteByCondition(s"${IdModel.ID_FLAG} = '$id'", request)
-    ""
+  override protected def doDeleteById(id: String, request: RequestProtocol): Option[String] = {
+    doDeleteByCondition(s"${IdModel.ID_FLAG} = '$id'", request)
+    Some(id)
   }
 
-  protected def executeDeleteByIdWithoutTransaction(id: String, request: RequestProtocol): String = {
-    executeDeleteByConditionWithoutTransaction(s"${IdModel.ID_FLAG} = '$id'", request)
-    ""
+  protected def doDeleteByIdWithoutTransaction(id: String, request: RequestProtocol): Option[String] = {
+    doDeleteByConditionWithoutTransaction(s"${IdModel.ID_FLAG} = '$id'", request)
+    Some(id)
   }
 
-  override protected def executeDeleteAll(request: RequestProtocol): List[String] = {
-    executeDeleteByCondition("1=1", request)
+  override protected def doDeleteAll(request: RequestProtocol): Option[List[String]] = {
+    doDeleteByCondition("1=1", request)
   }
 
-  protected def executeDeleteAllWithoutTransaction(request: RequestProtocol): List[String] = {
-    executeDeleteByConditionWithoutTransaction("1=1", request)
+  protected def doDeleteAllWithoutTransaction(request: RequestProtocol): Option[List[String]] = {
+    doDeleteByConditionWithoutTransaction("1=1", request)
   }
 
-  override protected def executeDeleteByCondition(condition: String, request: RequestProtocol): List[String] = {
+  override protected def doDeleteByCondition(condition: String, request: RequestProtocol): Option[List[String]] = {
     JDBCService.db.open()
-    executeDeleteByConditionWithoutTransaction(condition, request)
+    doDeleteByConditionWithoutTransaction(condition, request)
     JDBCService.db.commit()
-    List()
+    Some(List())
   }
 
-  protected def executeDeleteByConditionWithoutTransaction(condition: String, request: RequestProtocol): List[String] = {
+  protected def doDeleteByConditionWithoutTransaction(condition: String, request: RequestProtocol): Option[List[String]] = {
     JDBCService.db.update("DELETE FROM " + tableName + " WHERE " + condition + appendAuth(request))
-    List()
+    Some(List())
   }
 
-  protected def executeDeleteManyToManyRel(relTableName: String, condition: String, request: RequestProtocol): Unit = {
+  protected def doDeleteManyToManyRel(relTableName: String, condition: String, request: RequestProtocol): Unit = {
     val sql = if (condition == "1=1") {
       "DELETE FROM " + relTableName + " WHERE " + condition
     } else {

@@ -11,8 +11,8 @@ import scala.concurrent.Future
 
 object OrganizationService extends JDBCService[Organization] with ManageService {
 
-  def findOrganizationByAccountId(accountId: String, request: RequestProtocol): Future[ResponseDTO[List[Organization]]] = {
-    findByCondition(
+  def findOrganizationByAccountId(accountId: String, request: RequestProtocol): Future[Option[List[Organization]]] =Future {
+    executeFindByCondition(
       s"${IdModel.ID_FLAG} in" +
         s" (SELECT ${Organization._name + "_" + IdModel.ID_FLAG} FROM $REL_ORGANIZATION_ACCOUNT " +
         s"WHERE ${Account._name + "_" + IdModel.ID_FLAG} = '$accountId')" +
