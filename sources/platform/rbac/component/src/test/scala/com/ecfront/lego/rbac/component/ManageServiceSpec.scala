@@ -2,7 +2,6 @@ package com.ecfront.lego.rbac.component
 
 import com.ecfront.lego.core.component.protocol.RequestProtocol
 import com.ecfront.lego.core.component.storage.JDBCService
-import com.ecfront.lego.rbac.component.service.manage.{AppService, OrganizationService, ResourceService, RoleService}
 import com.ecfront.lego.rbac.foundation.{App, Organization, Resource, Role}
 import org.scalatest._
 
