@@ -8,50 +8,42 @@ import scala.beans.BeanProperty
 /**
  * APP实体
  */
-case class App() extends SecureModel {
-  @BeanProperty var name: String = _
-}
+case class App(@BeanProperty name: String) extends SecureModel
 
 /**
  * 组织实体
  */
-case class Organization() extends AppSecureModel {
-  @BeanProperty var name: String = _
-}
+case class Organization(@BeanProperty name: String) extends AppSecureModel
 
 /**
  * 角色实体，id=code@appId
  */
-case class Role() extends AppSecureModel {
-  @BeanProperty var code: String = _
-  @BeanProperty var name: String = _
-  @Ignore
-  @BeanProperty var resourceIds: List[String] = _
-}
+case class Role(@BeanProperty code: String,
+                @BeanProperty name: String,
+                @Ignore @BeanProperty resourceIds: List[String] = null
+                 ) extends AppSecureModel
 
 /**
  * 资源实体，id=address@appId
  */
-case class Resource() extends AppSecureModel {
-  @BeanProperty var name: String = _
-  @BeanProperty var address: String = _
-}
+case class Resource(
+                     @BeanProperty var name: String,
+                     @BeanProperty var address: String
+                     ) extends AppSecureModel
 
 /**
  * 账号实体，id=userId@appId
  */
-case class Account() extends AppSecureModel {
-  @BeanProperty var userId: String = _
-  @BeanProperty var userName: String = _
-  @BeanProperty var password: String = _
-  @BeanProperty var email: String = _
-  @Ignore
-  @BeanProperty var organizationIds: List[String] = _
-  @Ignore
-  @BeanProperty var roleIds: List[String] = _
-  @BeanProperty var extId: String = _
-  @BeanProperty var extInfo: String = _
-}
+case class Account(
+                    @BeanProperty var userId: String,
+                    @BeanProperty var userName: String,
+                    @BeanProperty var password: String,
+                    @BeanProperty var email: String,
+                    @BeanProperty var extId: String="",
+                    @BeanProperty var extInfo: String="",
+                    @Ignore @BeanProperty var organizationIds: List[String] = null,
+                    @Ignore @BeanProperty var roleIds: List[String] = null
+                    ) extends AppSecureModel
 
 /**
  * 认证类型

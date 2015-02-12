@@ -17,8 +17,9 @@ object RoleService extends JDBCService[Role] with ManageService {
   }
 
   override protected def convertToView(model: Role, request: RequestProtocol): Option[Role] = {
-    model.resourceIds = Await.result(ResourceService.findResourceByRoleId(model.id, request), Duration.Inf).get.map(_.id)
-    Some(model)
+    Some(model.copy(
+      resourceIds = Await.result(ResourceService.findResourceByRoleId(model.id, request), Duration.Inf).get.map(_.id)
+    ))
   }
 
   def findRoleByAccountId(accountId: String, request: RequestProtocol): Future[Option[List[Role]]] = Future {

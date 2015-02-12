@@ -85,7 +85,7 @@ class JDBCServiceSpec extends FunSuite {
   }
 }
 
-object TestService extends JDBCService[TestModel]
+object TestService extends JDBCService[TestModel] with FutureBasicService[TestModel]
 
 case class TestModel() extends SecureModel {
   @BeanProperty var name: String = _

@@ -16,9 +16,10 @@ object AccountService extends JDBCService[Account] with ManageService {
   }
 
   override protected def convertToView(model: Account, request: RequestProtocol): Option[Account] = {
-    model.roleIds = Await.result(RoleService.findRoleByAccountId(model.id, request), Duration.Inf).get.map(_.id)
-    model.organizationIds = Await.result(OrganizationService.findOrganizationByAccountId(model.id, request), Duration.Inf).get.map(_.id)
-    Some(model)
+    Some(model.copy(
+      roleIds = Await.result(RoleService.findRoleByAccountId(model.id, request), Duration.Inf).get.map(_.id),
+      organizationIds = Await.result(OrganizationService.findOrganizationByAccountId(model.id, request), Duration.Inf).get.map(_.id)
+    ))
   }
 
   override protected def doSave(model: Account, request: RequestProtocol): Option[String] = {
