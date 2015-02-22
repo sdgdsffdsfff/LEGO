@@ -1,49 +1,56 @@
 package com.ecfront.lego.rbac.foundation
 
-import com.ecfront.common.Ignore
 import com.ecfront.lego.core.foundation.{AppSecureModel, SecureModel}
+import com.ecfront.storage.ManyToMany
 
 import scala.beans.BeanProperty
 
 /**
  * APP实体
  */
-case class App(@BeanProperty name: String) extends SecureModel
+case class App() extends SecureModel {
+  @BeanProperty var name: String = _
+}
 
 /**
  * 组织实体
  */
-case class Organization(@BeanProperty name: String) extends AppSecureModel
+case class Organization() extends AppSecureModel {
+  @BeanProperty var name: String = _
+}
 
 /**
  * 角色实体，id=code@appId
  */
-case class Role(@BeanProperty code: String,
-                @BeanProperty name: String,
-                @Ignore @BeanProperty resourceIds: List[String] = null
-                 ) extends AppSecureModel
+case class Role() extends AppSecureModel {
+  @BeanProperty var code: String = _
+  @BeanProperty var name: String = _
+  @ManyToMany(master = true, fetch = false, mapping = "Resource") var resourceIds: List[String] = List()
+}
 
 /**
  * 资源实体，id=address@appId
  */
-case class Resource(
-                     @BeanProperty var name: String,
-                     @BeanProperty var address: String
-                     ) extends AppSecureModel
+case class Resource() extends AppSecureModel {
+  @BeanProperty var name: String = _
+  @BeanProperty var address: String = _
+  @ManyToMany(master = false, fetch = false, mapping = "Role") var roleIds: List[String] = List()
+}
 
 /**
  * 账号实体，id=userId@appId
  */
-case class Account(
-                    @BeanProperty var userId: String,
-                    @BeanProperty var userName: String,
-                    @BeanProperty var password: String,
-                    @BeanProperty var email: String,
-                    @BeanProperty var extId: String="",
-                    @BeanProperty var extInfo: String="",
-                    @Ignore @BeanProperty var organizationIds: List[String] = null,
-                    @Ignore @BeanProperty var roleIds: List[String] = null
-                    ) extends AppSecureModel
+case class Account() extends AppSecureModel {
+  @BeanProperty var loginId: String = _
+  @BeanProperty var name: String = _
+  @BeanProperty var password: String = _
+  @BeanProperty var email: String = _
+  @BeanProperty var extId: String = _
+  @BeanProperty var extInfo: String = _
+  @ManyToMany(master = true, fetch = true, mapping = "Organization") var organizationIds: List[String] = List()
+  @ManyToMany(master = true, fetch = true, mapping = "Role") var roleIds: List[String] = List()
+
+}
 
 /**
  * 认证类型

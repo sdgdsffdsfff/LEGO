@@ -1,7 +1,10 @@
 package com.ecfront.lego.core.foundation
 
+import com.ecfront.storage.Entity
+
 import scala.beans.BeanProperty
 
+@Entity(idField = "id")
 abstract class IdModel {
   @BeanProperty var id: String = _
 }

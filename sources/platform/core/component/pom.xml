@@ -21,11 +21,6 @@
             <version>1.0</version>
         </dependency>
         <dependency>
-            <groupId>com.ecfront</groupId>
-            <artifactId>storage</artifactId>
-            <version>0.1</version>
-        </dependency>
-        <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
             <version>3.0.0-milestone2</version>

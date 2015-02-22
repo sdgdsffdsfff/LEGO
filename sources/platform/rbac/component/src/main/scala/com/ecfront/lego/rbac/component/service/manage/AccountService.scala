@@ -6,10 +6,10 @@ import com.ecfront.lego.core.component.storage.JDBCService
 import com.ecfront.lego.core.foundation.IdModel
 import com.ecfront.lego.rbac.foundation.Account
 
-object AccountService extends JDBCService[Account] with SyncBasicService {
+object AccountService extends JDBCService[Account] with SyncBasicService[Account] {
 
   override protected def preSave(model: Account, request: RequestProtocol): (Boolean, Any) = {
-    model.id = model.userId + IdModel.SPLIT_FLAG + (if (!isSystem(request) || model.appId == null) request.appId else model.appId)
+    model.id = model.loginId + IdModel.SPLIT_FLAG + (if (!isSystem(request) || model.appId == null) request.appId else model.appId)
     (true, model)
   }
 
