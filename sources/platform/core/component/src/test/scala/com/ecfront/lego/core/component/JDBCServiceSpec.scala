@@ -3,6 +3,7 @@ package com.ecfront.lego.core.component
 import com.ecfront.lego.core.component.protocol.RequestProtocol
 import com.ecfront.lego.core.component.storage.JDBCService
 import com.ecfront.lego.core.foundation.SecureModel
+import com.ecfront.storage.Entity
 import org.scalatest._
 
 import scala.beans.BeanProperty
@@ -87,6 +88,7 @@ class JDBCServiceSpec extends FunSuite {
 
 object TestService extends JDBCService[TestModel] with FutureBasicService[TestModel]
 
+@Entity(idField = "id")
 case class TestModel() extends SecureModel {
   @BeanProperty var name: String = _
   @BeanProperty var bool: Boolean = _

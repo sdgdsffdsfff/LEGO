@@ -5,6 +5,7 @@ import com.ecfront.lego.core.component.communication.Communication
 import com.ecfront.lego.core.component.protocol.ResponseProtocol.log
 import com.ecfront.lego.core.component.protocol._
 import com.ecfront.lego.core.foundation._
+import com.ecfront.storage.PageModel
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.collection.mutable.ArrayBuffer

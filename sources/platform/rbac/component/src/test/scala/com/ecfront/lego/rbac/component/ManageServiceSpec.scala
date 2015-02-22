@@ -2,6 +2,7 @@ package com.ecfront.lego.rbac.component
 
 import com.ecfront.lego.core.component.protocol.RequestProtocol
 import com.ecfront.lego.core.component.storage.JDBCService
+import com.ecfront.lego.rbac.component.service.manage.{OrganizationService, AppService}
 import com.ecfront.lego.rbac.foundation.{App, Organization, Resource, Role}
 import org.scalatest._
 
@@ -20,7 +21,7 @@ class JDBCServiceSpec extends FunSuite {
 
   test("管理服务测试") {
     //-------------------save--------------------------------------------
-    val appId = Await.result(AppService.save(App("测试应用"), request), Duration.Inf).get
+    val appId = AppService.save(App("测试应用"), request)
     val orgId1 = Await.result(OrganizationService.save(Organization("A组"), request), Duration.Inf).get
     val orgId2 = Await.result(OrganizationService.save(Organization("2组"), request), Duration.Inf).get
     val role_admin = Await.result(RoleService.save(Role("admin", "管理员"), request), Duration.Inf).get

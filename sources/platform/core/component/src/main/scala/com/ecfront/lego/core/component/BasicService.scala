@@ -5,7 +5,8 @@ import java.util.UUID
 
 import com.ecfront.common.BeanHelper
 import com.ecfront.lego.core.component.protocol.RequestProtocol
-import com.ecfront.lego.core.foundation.{AppSecureModel, IdModel, PageModel, SecureModel}
+import com.ecfront.lego.core.foundation.{AppSecureModel, IdModel, SecureModel}
+import com.ecfront.storage.PageModel
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 trait BasicService[M <: AnyRef] extends LazyLogging {
@@ -27,10 +28,6 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
   protected def isSystem(request: RequestProtocol): Boolean = {
     AppSecureModel.LEGO_APP_FLAG == request.appId
   }
-
-  protected def init(modelClazz: Class[M]): Unit
-
-  init(modelClazz)
 
   //=========================GetByID=========================
 
@@ -56,7 +53,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     }
   }
 
-  protected def doGetById(id: String, request: RequestProtocol): Option[M] = ???
+  protected def doGetById(id: String, request: RequestProtocol): Option[M]
 
   //=========================GetByCondition=========================
 
@@ -82,7 +79,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     }
   }
 
-  protected def doGetByCondition(condition: String, request: RequestProtocol): Option[M] = ???
+  protected def doGetByCondition(condition: String, request: RequestProtocol): Option[M]
 
   //=========================FindAll=========================
 
@@ -108,7 +105,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     }
   }
 
-  protected def doFindAll(request: RequestProtocol): Option[List[M]] = ???
+  protected def doFindAll(request: RequestProtocol): Option[List[M]]
 
   //=========================FindByCondition=========================
 
@@ -134,7 +131,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     }
   }
 
-  protected def doFindByCondition(condition: String, request: RequestProtocol): Option[List[M]] = ???
+  protected def doFindByCondition(condition: String, request: RequestProtocol): Option[List[M]]
 
   //=========================PageAll=========================
 
@@ -151,7 +148,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     if (continue) {
       val result = doPageAll(pageNumber, pageSize, request)
       if (result != null && result.get.results.nonEmpty) {
-        result.get.results = convertToViews(result.get.results, request).getOrElse(null)
+        result.get.setResults(convertToViews(result.get.results, request).orNull)
       }
       postPageAll(result, preResult, pageNumber, pageSize, request)
     } else {
@@ -159,7 +156,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     }
   }
 
-  protected def doPageAll(pageNumber: Long, pageSize: Long, request: RequestProtocol): Option[PageModel[M]] = ???
+  protected def doPageAll(pageNumber: Long, pageSize: Long, request: RequestProtocol): Option[PageModel[M]]
 
   //=========================PageByCondition=========================
 
@@ -176,7 +173,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     if (continue) {
       val result = doPageByCondition(condition, pageNumber, pageSize, request)
       if (result != null && result.get.results.nonEmpty) {
-        result.get.results = convertToViews(result.get.results, request).getOrElse(null)
+        result.get.setResults(convertToViews(result.get.results, request).orNull)
       }
       postPageByCondition(result, preResult, pageNumber, pageSize, request)
     } else {
@@ -184,7 +181,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     }
   }
 
-  protected def doPageByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol): Option[PageModel[M]] = ???
+  protected def doPageByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol): Option[PageModel[M]]
 
   //=========================Save=========================
 
@@ -225,7 +222,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     }
   }
 
-  protected def doSave(model: M, request: RequestProtocol): Option[String] = ???
+  protected def doSave(model: M, request: RequestProtocol): Option[String]
 
   //=========================Update=========================
 
@@ -263,7 +260,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     }
   }
 
-  protected def doUpdate(id: String, model: M, request: RequestProtocol): Option[String] = ???
+  protected def doUpdate(id: String, model: M, request: RequestProtocol): Option[String]
 
   //=========================DeleteById=========================
 
@@ -284,7 +281,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     }
   }
 
-  protected def doDeleteById(id: String, request: RequestProtocol): Option[String] = ???
+  protected def doDeleteById(id: String, request: RequestProtocol): Option[String]
 
   //=========================DeleteByCondition=========================
 
@@ -305,7 +302,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     }
   }
 
-  protected def doDeleteByCondition(condition: String, request: RequestProtocol): Option[List[String]] = ???
+  protected def doDeleteByCondition(condition: String, request: RequestProtocol): Option[List[String]]
 
   //=========================DeleteAll=========================
 
@@ -326,7 +323,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     }
   }
 
-  protected def doDeleteAll(request: RequestProtocol): Option[List[String]] = ???
+  protected def doDeleteAll(request: RequestProtocol): Option[List[String]]
 
 }
 

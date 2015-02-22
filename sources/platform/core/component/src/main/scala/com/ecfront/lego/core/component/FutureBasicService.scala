@@ -1,7 +1,7 @@
 package com.ecfront.lego.core.component
 
 import com.ecfront.lego.core.component.protocol.RequestProtocol
-import com.ecfront.lego.core.foundation.PageModel
+import com.ecfront.storage.PageModel
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
