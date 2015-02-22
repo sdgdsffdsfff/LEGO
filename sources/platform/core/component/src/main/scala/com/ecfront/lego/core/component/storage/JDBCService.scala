@@ -32,6 +32,10 @@ trait JDBCService[M <: IdModel] extends BasicService[M] with JDBCStorable[M, Req
     _save(model, request)
   }
 
+  protected def doSaveWithoutTransaction(model: M, request: RequestProtocol): Option[String] = {
+    _saveWithoutTransaction(model, request)
+  }
+
   override protected def doFindByCondition(condition: String, request: RequestProtocol): Option[List[M]] = {
     _findByCondition(condition, request)
   }

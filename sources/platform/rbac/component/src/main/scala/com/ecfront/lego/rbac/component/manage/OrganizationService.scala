@@ -1,4 +1,4 @@
-package com.ecfront.lego.rbac.component.service.manage
+package com.ecfront.lego.rbac.component.manage
 
 import com.ecfront.lego.core.component.SyncBasicService
 import com.ecfront.lego.core.component.storage.JDBCService

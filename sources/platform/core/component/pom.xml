@@ -14,6 +14,9 @@
     <artifactId>lego-core-component</artifactId>
     <version>1.0</version>
 
+    <properties>
+        <vertx.version>3.0.0-milestone2</vertx.version>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.ecfront</groupId>
@@ -23,7 +26,12 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
-            <version>3.0.0-milestone2</version>
+            <version>${vertx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-hazelcast</artifactId>
+            <version>${vertx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.scalatest</groupId>
