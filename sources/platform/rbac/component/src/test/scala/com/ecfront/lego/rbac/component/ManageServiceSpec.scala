@@ -1,6 +1,6 @@
 package com.ecfront.lego.rbac.component
 
-import com.ecfront.lego.core.component.protocol.RequestProtocol
+import com.ecfront.lego.core.component.protocol.Req
 import com.ecfront.lego.core.component.storage.JDBCService
 import com.ecfront.lego.rbac.component.manage._
 import com.ecfront.lego.rbac.foundation._
@@ -14,7 +14,7 @@ class JDBCServiceSpec extends FunSuite {
 
   JDBCService.init(testPath)
 
-  val request = RequestProtocol("0000", "jzy", "test_app")
+  val request = Req("0000", "jzy", "test_app")
 
   test("管理服务测试") {
     //-------------------save--------------------------------------------
@@ -62,9 +62,9 @@ class JDBCServiceSpec extends FunSuite {
     account_2.roleIds = List("admin" + appId)
     AccountService.save(account_2, request)
     //-------------------get--------------------------------------------
-    assert(RoleService.getById("user@" + appId, request).get.name == "用户")
-    assert(ResourceService.getById("login@" + appId, request).get.name == "登录")
-    val acc = AccountService.getById("2@" + appId, request).get
+    assert(RoleService.getById("user@" + appId, request).body.name == "用户")
+    assert(ResourceService.getById("login@" + appId, request).body.name == "登录")
+    val acc = AccountService.getById("2@" + appId, request).body
     assert(acc.name == "lisi")
     assert(acc.organizationIds.size == 2)
     assert(acc.organizationIds(1) == "b")

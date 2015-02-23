@@ -2,7 +2,7 @@ package com.ecfront.lego.core.component.protocol
 
 import com.ecfront.lego.core.foundation.{AppSecureModel, SecureModel}
 
-case class RequestProtocol(
+case class Req(
                             cId: String,
                             accountId: String,
                             appId: String
@@ -12,6 +12,6 @@ case class RequestProtocol(
   var body: String = _
 }
 
-object RequestProtocol {
-  def createBySystem = RequestProtocol(System.nanoTime() + "", SecureModel.SYSTEM_USER_FLAG, AppSecureModel.LEGO_APP_FLAG)
+object Req {
+  def createBySystem = Req(System.nanoTime() + "", SecureModel.SYSTEM_USER_FLAG, AppSecureModel.LEGO_APP_FLAG)
 }

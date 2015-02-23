@@ -1,6 +1,10 @@
 package com.ecfront.lego.rbac.component
 
-import com.ecfront.lego.core.component.protocol.RequestProtocol
+import java.util.UUID
+
+import com.ecfront.lego.core.component.protocol.{Req, Resp}
+import com.ecfront.lego.core.foundation.StandardCode
+import com.ecfront.lego.rbac.component.manage.AccountService
 import com.ecfront.lego.rbac.foundation.LoginInfo
 
 object AuthService {
@@ -11,11 +15,25 @@ object AuthService {
    * @param password        密码
    * @param request
    */
-  def login(password: String, request: RequestProtocol): LoginInfo = {
-    val appId = request.appId
-    val accountId = request.accountId
-    if (appId == null || accountId == null || password == null) {
-
+  def login(loginId: String, password: String, request: Req): Resp[LoginInfo] = {
+    if (request.appId != null && loginId != null && password != null) {
+      val appId = request.appId.trim
+      if (appId.nonEmpty && loginId.trim.nonEmpty && password.trim.nonEmpty) {
+        val accountResp = AccountService.getById(AccountService.packageId(loginId.trim, appId, request), request)
+        if (accountResp.body != null && accountResp.body.password == AccountService.packageEnryptPwd(loginId.trim, password.trim)) {
+          accountResp.body.password = null
+          val loginInfo = LoginInfo(accountResp.body, System.currentTimeMillis())
+          loginInfo.id = "token_" + UUID.randomUUID().toString
+          TokenService.save(loginInfo,request)
+          Resp.success(loginInfo)
+        } else {
+          Resp.fail(StandardCode.BAD_REQUEST_CODE, "LoginId or Password error..")
+        }
+      } else {
+        Resp.fail(StandardCode.BAD_REQUEST_CODE, "Missing required field.")
+      }
+    } else {
+      Resp.fail(StandardCode.BAD_REQUEST_CODE, "Missing required field.")
     }
   }
 
@@ -24,8 +42,9 @@ object AuthService {
    *
    * @param token
    */
-  def logout(token: String, request: RequestProtocol): Unit = {
+  def logout(token: String, request: Req): Resp[Void] = {
     TokenService.deleteById(token, request)
+    Resp.success(null)
   }
 
   /**
@@ -33,8 +52,8 @@ object AuthService {
    *
    * @param token
    */
-  def getLoginInfo(token: String, request: RequestProtocol): LoginInfo = {
-    TokenService.getById(token, request).orNull
+  def getLoginInfo(token: String, request: Req): Resp[LoginInfo] = {
+    TokenService.getById(token, request)
   }
 
   /**

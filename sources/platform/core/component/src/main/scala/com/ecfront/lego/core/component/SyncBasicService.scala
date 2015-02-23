@@ -1,51 +1,51 @@
 package com.ecfront.lego.core.component
 
-import com.ecfront.lego.core.component.protocol.RequestProtocol
+import com.ecfront.lego.core.component.protocol.{Req, Resp}
 import com.ecfront.storage.PageModel
 
 trait SyncBasicService[M <: AnyRef] extends BasicService[M] {
 
-  def getById(id: String, request: RequestProtocol): Option[M] = {
+  def getById(id: String, request: Req): Resp[M] = {
     executeGetById(id, request)
   }
 
-  def getByCondition(condition: String, request: RequestProtocol): Option[M] = {
+  def getByCondition(condition: String, request: Req): Resp[M] = {
     executeGetByCondition(condition, request)
   }
 
-  def findAll(request: RequestProtocol): Option[List[M]] = {
+  def findAll(request: Req): Resp[List[M]] = {
     executeFindAll(request)
   }
 
-  def findByCondition(condition: String, request: RequestProtocol): Option[List[M]] = {
+  def findByCondition(condition: String, request: Req): Resp[List[M]] = {
     executeFindByCondition(condition, request)
   }
 
-  def pageAll(pageNumber: Long, pageSize: Long, request: RequestProtocol): Option[PageModel[M]] = {
+  def pageAll(pageNumber: Long, pageSize: Long, request: Req): Resp[PageModel[M]] = {
     executePageAll(pageNumber, pageSize, request)
   }
 
-  def pageByCondition(condition: String, pageNumber: Long, pageSize: Long, request: RequestProtocol): Option[PageModel[M]] = {
+  def pageByCondition(condition: String, pageNumber: Long, pageSize: Long, request: Req): Resp[PageModel[M]] = {
     executePageByCondition(condition, pageNumber, pageSize, request)
   }
 
-  def save(model: M, request: RequestProtocol): Option[String] = {
+  def save(model: M, request: Req): Resp[String] = {
     executeSave(model, request)
   }
 
-  def update(id: String, model: M, request: RequestProtocol): Option[String] = {
+  def update(id: String, model: M, request: Req): Resp[String] = {
     executeUpdate(id, model, request)
   }
 
-  def deleteById(id: String, request: RequestProtocol): Option[String] = {
+  def deleteById(id: String, request: Req): Resp[String] = {
     executeDeleteById(id, request)
   }
 
-  def deleteByCondition(condition: String, request: RequestProtocol): Option[List[String]] = {
+  def deleteByCondition(condition: String, request: Req): Resp[List[String]] = {
     executeDeleteByCondition(condition, request)
   }
 
-  def deleteAll(request: RequestProtocol): Option[List[String]] = {
+  def deleteAll(request: Req): Resp[List[String]] = {
     executeDeleteAll(request)
   }
 
