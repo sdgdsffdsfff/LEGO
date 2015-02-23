@@ -12,16 +12,17 @@
 
     <groupId>com.ecfront</groupId>
     <artifactId>lego-core-component</artifactId>
-    <version>1.0</version>
+    <version>${lego.version}</version>
 
     <properties>
         <vertx.version>3.0.0-milestone2</vertx.version>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.ecfront</groupId>
             <artifactId>lego-core-foundation</artifactId>
-            <version>1.0</version>
+            <version>${lego.version}</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
@@ -33,27 +34,6 @@
             <artifactId>vertx-hazelcast</artifactId>
             <version>${vertx.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_2.11</artifactId>
-            <version>2.2.1</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.scala-lang</groupId>
-                    <artifactId>scala-library</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>net.alchim31.maven</groupId>
-                <artifactId>scala-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

@@ -12,7 +12,7 @@
 
     <groupId>com.ecfront</groupId>
     <artifactId>lego-core-foundation</artifactId>
-    <version>1.0</version>
+    <version>${lego.version}</version>
 
     <dependencies>
         <dependency>
@@ -21,14 +21,5 @@
             <version>0.2</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>net.alchim31.maven</groupId>
-                <artifactId>scala-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

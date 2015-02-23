@@ -1,24 +1,22 @@
-import java.util.concurrent.CountDownLatch
-
 import org.scalatest.FunSuite
 
 import scala.beans.BeanProperty
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Future, _}
-import scala.util.{Failure, Success}
 import scala.concurrent.duration.Duration
+import scala.concurrent.{Future, _}
+
 class FutureSpec extends FunSuite {
 
 
   test("Future测试") {
-     val start = System.currentTimeMillis()
-     Await.result(FutureService.init, Duration.Inf)
-     val a = FutureService.save(FutureModel("1", "aa"))
-     val b = FutureService.save(FutureModel("2", "bb"))
-     Await.result(a, Duration.Inf)
-     Await.result(b, Duration.Inf)
-     Await.result(FutureService.find(), Duration.Inf)
-     printf((System.currentTimeMillis() - start) / 1000 + "")
+    val start = System.currentTimeMillis()
+    Await.result(FutureService.init, Duration.Inf)
+    val a = FutureService.save(FutureModel("1", "aa"))
+    val b = FutureService.save(FutureModel("2", "bb"))
+    Await.result(a, Duration.Inf)
+    Await.result(b, Duration.Inf)
+    Await.result(FutureService.find(), Duration.Inf)
+    printf((System.currentTimeMillis() - start) / 1000 + "")
 
     /* val w = new CountDownLatch(1)
      async {
@@ -35,23 +33,23 @@ class FutureSpec extends FunSuite {
      }
      w.await()*/
 
-   /* val w = new CountDownLatch(1)
-    FutureService.init.onComplete {
-      case Success(res) => FutureService.save(FutureModel("1", "aa")).onComplete {
-        case Success(res) => FutureService.save(FutureModel("2", "bb")).onComplete {
-          case Success(res) =>
-            FutureService.find().onComplete {
-              case Success(res) =>
-                println(res)
-                w.countDown()
-              case Failure(ex) => ex.printStackTrace()
-            }
-        }
-        case Failure(ex) => ex.printStackTrace()
-      }
-      case Failure(ex) => ex.printStackTrace()
-    }
-    w.await()*/
+    /* val w = new CountDownLatch(1)
+     FutureService.init.onComplete {
+       case Success(res) => FutureService.save(FutureModel("1", "aa")).onComplete {
+         case Success(res) => FutureService.save(FutureModel("2", "bb")).onComplete {
+           case Success(res) =>
+             FutureService.find().onComplete {
+               case Success(res) =>
+                 println(res)
+                 w.countDown()
+               case Failure(ex) => ex.printStackTrace()
+             }
+         }
+         case Failure(ex) => ex.printStackTrace()
+       }
+       case Failure(ex) => ex.printStackTrace()
+     }
+     w.await()*/
   }
 
 }
@@ -59,13 +57,13 @@ class FutureSpec extends FunSuite {
 object FutureService {
 
 
-  def init: Future[String] =Future {
+  def init: Future[String] = Future {
     Thread.sleep(1000)
     println(Thread.currentThread().getName + "init")
-   ""
+    ""
   }
 
-  def save(m: FutureModel): Future[String] =Future {
+  def save(m: FutureModel): Future[String] = Future {
     Thread.sleep(10000)
     println(Thread.currentThread().getName + "save")
     ""
