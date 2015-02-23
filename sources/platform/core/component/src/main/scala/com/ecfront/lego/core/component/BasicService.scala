@@ -44,7 +44,11 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     if (preResult) {
       val result = doGetById(id, request)
       if (result) {
-        postGetById(convertToView(result.body, request), preResult.body, request)
+        if (result != null) {
+          postGetById(convertToView(result.body, request), preResult.body, request)
+        } else {
+          Resp.fail(StandardCode.NOT_FOUND_CODE, "Model [%s] not exist by %s".format(modelClazz.getSimpleName, id))
+        }
       } else {
         Resp.fail(result.code, result.message)
       }
@@ -70,7 +74,11 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     if (preResult) {
       val result = doGetByCondition(condition, request)
       if (result) {
-        postGetByCondition(convertToView(result.body, request), preResult.body, request)
+        if (result != null) {
+          postGetByCondition(convertToView(result.body, request), preResult.body, request)
+        } else {
+          Resp.fail(StandardCode.NOT_FOUND_CODE, "Model [%s] not exist by %s".format(modelClazz.getSimpleName, condition))
+        }
       } else {
         Resp.fail(result.code, result.message)
       }
@@ -253,10 +261,10 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
       BeanHelper.copyProperties(getResult.body, model)
       model match {
         case idModel: IdModel =>
-          idModel.id=id
-          if(!isSystem(request)){
+          idModel.id = id
+          if (!isSystem(request)) {
             idModel match {
-              case secureModel: SecureModel=>
+              case secureModel: SecureModel =>
                 secureModel.updateTime = System.currentTimeMillis()
                 secureModel.updateUser = request.accountId
                 secureModel match {

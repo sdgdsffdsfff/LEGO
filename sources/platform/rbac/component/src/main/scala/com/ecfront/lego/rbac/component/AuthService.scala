@@ -11,9 +11,6 @@ object AuthService {
 
   /**
    * 登录
-   *
-   * @param password        密码
-   * @param request
    */
   def login(loginId: String, password: String, request: Req): Resp[LoginInfo] = {
     if (request.appId != null && loginId != null && password != null) {
@@ -72,5 +69,7 @@ object AuthService {
    * @param basic
    * @param callbackHandler  return success:null 表示授权通过，fail 表示不通过
    */
-  def authorization(action: Nothing, appId: Nothing, userId: Nothing, basic: Nothing, callbackHandler: Nothing)
+  def authorization(address: String, request: Req): Resp[Boolean]={
+
+  }
 }

@@ -28,6 +28,7 @@ class JDBCServiceSpec extends FunSuite {
     model.age = 14
     model.id = "id001"
     Await.result(TestJDBCService.save(model, request), Duration.Inf)
+    assert(Await.result(TestJDBCService.save(model, request), Duration.Inf).message=="Id exist :id001")
     var resultSingle = Await.result(TestJDBCService.getById("id001", request), Duration.Inf).body
     assert(resultSingle.name == "张三")
     assert(resultSingle.bool)
@@ -41,7 +42,7 @@ class JDBCServiceSpec extends FunSuite {
     Await.result(TestJDBCService.update("id001", model, request), Duration.Inf)
     resultSingle = Await.result(TestJDBCService.getById("id001", request), Duration.Inf).body
     assert(resultSingle.name == "haha")
-    assert(resultSingle.bool == false)
+    assert(!resultSingle.bool)
     //-------------------getByCondition--------------------------------------------
     resultSingle = Await.result(TestJDBCService.getByCondition("id='%s' AND name='%s'".format("id001", "haha"), request), Duration.Inf).body
     assert(resultSingle.name == "haha")
