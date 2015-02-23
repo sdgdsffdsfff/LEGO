@@ -204,9 +204,9 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     model match {
       case tModel: SecureModel =>
         tModel.createTime = System.currentTimeMillis()
-        tModel.createUser = request.userId
+        tModel.createUser = request.accountId
         tModel.updateTime = System.currentTimeMillis()
-        tModel.updateUser = request.userId
+        tModel.updateUser = request.accountId
       case _ =>
     }
     model match {
@@ -241,7 +241,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
       model match {
         case tModel: SecureModel if !isSystem(request) =>
           tModel.updateTime = System.currentTimeMillis()
-          tModel.updateUser = request.userId
+          tModel.updateUser = request.accountId
         case _ =>
       }
       model match {

@@ -1,7 +1,7 @@
 package com.ecfront.lego.rbac.component
 
 import com.ecfront.lego.core.component.protocol.RequestProtocol
-import com.ecfront.lego.rbac.foundation.{LoginInfo, loginInfo}
+import com.ecfront.lego.rbac.foundation.LoginInfo
 
 object AuthService {
 
@@ -11,27 +11,31 @@ object AuthService {
    * @param password        密码
    * @param request
    */
-  def login(password: String, request: RequestProtocol):LoginInfo={
+  def login(password: String, request: RequestProtocol): LoginInfo = {
+    val appId = request.appId
+    val accountId = request.accountId
+    if (appId == null || accountId == null || password == null) {
 
+    }
   }
 
   /**
    * 注销
    *
    * @param token
-   * @param basic
-   * @param callbackHandler return success:null
    */
-  def logout(token: String, request: RequestProtocol)
+  def logout(token: String, request: RequestProtocol): Unit = {
+    TokenService.deleteById(token, request)
+  }
 
   /**
    * 获取登录信息
    *
    * @param token
-   * @param basic
-   * @param callbackHandler return success:loginSB
    */
-  def getLoginInfo(token: Nothing, basic: Nothing, callbackHandler: Nothing)
+  def getLoginInfo(token: String, request: RequestProtocol): LoginInfo = {
+    TokenService.getById(token, request).orNull
+  }
 
   /**
    * 授权

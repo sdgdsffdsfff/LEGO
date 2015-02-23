@@ -86,7 +86,7 @@ object CoreFacade extends LazyLogging {
   }
 
   private[this] def doExecute[M, C](address: String, action: String, returnType: String, parameters: Map[String, Any], body: Any, modelClazz: Class[M], request: RequestProtocol): Future[Option[C]] = {
-    logger.debug("Execute cid: %s , address: %s , action: %s , userId: %s , appId: %s ".format(request.cId, address, action, request.userId, request.appId))
+    logger.debug("Execute cid: %s , address: %s , action: %s , userId: %s , appId: %s ".format(request.cId, address, action, request.accountId, request.appId))
     //TODO rbac
     //TODO cache
     val p = Promise[Option[C]]()

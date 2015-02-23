@@ -4,7 +4,7 @@ import com.ecfront.lego.core.foundation.{AppSecureModel, SecureModel}
 
 case class RequestProtocol(
                             cId: String,
-                            userId: String,
+                            accountId: String,
                             appId: String
                             ) {
   var action: String = _
