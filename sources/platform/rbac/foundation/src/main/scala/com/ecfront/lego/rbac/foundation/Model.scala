@@ -34,7 +34,7 @@ case class Role() extends AppSecureModel {
 case class Resource() extends AppSecureModel {
   @BeanProperty var name: String = _
   @BeanProperty var address: String = _
-  @ManyToMany(master = false, fetch = false, mapping = "Role") var roleIds: List[String] = List()
+  @ManyToMany(master = false, fetch = true, mapping = "Role") var roleIds: List[String] = List()
 }
 
 /**

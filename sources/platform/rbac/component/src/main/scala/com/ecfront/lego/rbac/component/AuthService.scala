@@ -2,9 +2,10 @@ package com.ecfront.lego.rbac.component
 
 import java.util.UUID
 
+import com.ecfront.lego.core.component.keylog.KeyLogService
 import com.ecfront.lego.core.component.protocol.{Req, Resp}
 import com.ecfront.lego.core.foundation.StandardCode
-import com.ecfront.lego.rbac.component.manage.AccountService
+import com.ecfront.lego.rbac.component.manage.{AccountService, ResourceService}
 import com.ecfront.lego.rbac.foundation.LoginInfo
 
 object AuthService {
@@ -21,9 +22,11 @@ object AuthService {
           accountResp.body.password = null
           val loginInfo = LoginInfo(accountResp.body, System.currentTimeMillis())
           loginInfo.id = "token_" + UUID.randomUUID().toString
-          TokenService.save(loginInfo,request)
+          TokenService.save(loginInfo, request)
+          KeyLogService.success("Login success by " + loginId, request)
           Resp.success(loginInfo)
         } else {
+          KeyLogService.unAuthorized("LoginId or Password error by " + loginId, request)
           Resp.fail(StandardCode.BAD_REQUEST_CODE, "LoginId or Password error..")
         }
       } else {
@@ -40,6 +43,10 @@ object AuthService {
    * @param token
    */
   def logout(token: String, request: Req): Resp[Void] = {
+    val loginInfo = TokenService.getById(token, request)
+    if (loginInfo) {
+      KeyLogService.success("Logout success by " + loginInfo.body.account.loginId, request)
+    }
     TokenService.deleteById(token, request)
     Resp.success(null)
   }
@@ -58,18 +65,28 @@ object AuthService {
    * <ul>核心流程：
    * <li>action在资源表中是否存在，不存在表示可匿名访问，通过</li>
    * <li>action在资源表存在但没有关联任务角色，表示可匿名访问，通过</li>
-   * <li>appId及userId是否存在，如不存在则不通过</li>
    * <li>获取登录用户信息</li>
    * <li>比对登录用户的角色与action可访问的角色是否有交集，有则通过反之不通过</li>
    * </ul>
-   *
-   * @param action          请求地址
-   * @param appId           应用ID
-   * @param userId          用户ID
-   * @param basic
-   * @param callbackHandler  return success:null 表示授权通过，fail 表示不通过
    */
-  def authorization(address: String, request: Req): Resp[Boolean]={
+  def authorization(token: String, request: Req): Resp[Void] = {
+    val res = ResourceService.getByRequest(request)
+    if (res != null && res.roleIds.nonEmpty) {
+      //请求资源（action）需要认证
+      val loginInfo = getLoginInfo(token, request)
+      if (loginInfo && loginInfo.body != null) {
+        if ((res.roleIds.toSet & loginInfo.body.account.roleIds.toSet).nonEmpty) {
+          Resp.success(null)
+        } else {
+          Resp.fail(StandardCode.UNAUTHORIZED_CODE, "The action [%s] allowed role not in request!".format(request.action))
+        }
+      } else {
+        Resp.fail(StandardCode.UNAUTHORIZED_CODE, "The action [%s] must authorization!".format(request.action))
+      }
+    } else {
+      //可匿名访问
+      Resp.success(null)
+    }
 
   }
 }
