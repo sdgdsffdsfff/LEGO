@@ -10,14 +10,11 @@ import scala.concurrent.duration.Duration
 
 class JDBCServiceSpec extends FunSuite {
 
-  var testPath = this.getClass.getResource("/").getPath
-  if (System.getProperties.getProperty("os.name").toUpperCase.indexOf("WINDOWS") != -1) {
-    testPath = testPath.substring(1)
-  }
+
 
   test("JDBC服务测试") {
 
-    JDBCService.init(testPath)
+    JDBCService.init
 
     val request = Req("0000", "jzy", "test_app")
 

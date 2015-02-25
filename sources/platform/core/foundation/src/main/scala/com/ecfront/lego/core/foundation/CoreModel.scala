@@ -33,3 +33,11 @@ object AppSecureModel {
   val APP_ID_FLAG = "appId"
   val LEGO_APP_FLAG = "LEGO"
 }
+
+case class KeyLog() extends AppSecureModel {
+  @BeanProperty var code: String = _
+  @BeanProperty var message: String = _
+  @BeanProperty var action: String = _
+  @BeanProperty var componentId: String = _
+  @BeanProperty var trackId: String = _
+}

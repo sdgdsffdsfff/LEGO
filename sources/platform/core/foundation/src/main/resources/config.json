@@ -1,0 +1,7 @@
+{
+  "id": "rbac",
+  "version": "1.0",
+  "name": "用户权限管理",
+  "dependency": [],
+  "config": {}
+}

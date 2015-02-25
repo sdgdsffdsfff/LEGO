@@ -2,7 +2,7 @@ package com.ecfront.lego.core.component.storage
 
 import java.util.concurrent.CountDownLatch
 
-import com.ecfront.lego.core.CoreInfo
+import com.ecfront.lego.core.ComponentInfo
 import com.ecfront.lego.core.component.BasicService
 import com.ecfront.lego.core.component.protocol.{Req, Resp}
 import com.ecfront.lego.core.foundation.{StandardCode, IdModel}
@@ -19,7 +19,7 @@ trait DCacheService[M <: IdModel] extends BasicService[M] {
 
   private def init: Unit = {
     val latch = new CountDownLatch(1)
-    CoreInfo.vertx.sharedData().getClusterWideMap(cacheName, new Handler[AsyncResult[AsyncMap[String, M]]] {
+    ComponentInfo.vertx.sharedData().getClusterWideMap(cacheName, new Handler[AsyncResult[AsyncMap[String, M]]] {
       override def handle(res: AsyncResult[AsyncMap[String, M]]): Unit = {
         if (res.succeeded()) {
           CACHE = res.result()

@@ -7,12 +7,8 @@ import com.ecfront.lego.rbac.foundation._
 import org.scalatest._
 
 class JDBCServiceSpec extends FunSuite {
-  var testPath = this.getClass.getResource("/").getPath
-  if (System.getProperties.getProperty("os.name").toUpperCase.indexOf("WINDOWS") != -1) {
-    testPath = testPath.substring(1)
-  }
 
-  JDBCService.init(testPath)
+  JDBCService.init
 
   val request = Req("0000", "jzy", "test_app")
 

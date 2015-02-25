@@ -4,15 +4,20 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>com.ecfront</groupId>
+        <artifactId>ez-parent</artifactId>
+        <version>0.1</version>
+    </parent>
+
     <groupId>com.ecfront</groupId>
     <artifactId>lego-parent</artifactId>
     <packaging>pom</packaging>
     <version>${lego.version}</version>
 
     <properties>
-        <ez-common.version>0.3.1</ez-common.version>
+        <ez-common.version>0.3.2</ez-common.version>
         <lego.version>1.0</lego.version>
-        <scalatest.version>2.2.1</scalatest.version>
     </properties>
 
     <dependencies>
@@ -21,36 +26,6 @@
             <artifactId>ez-common</artifactId>
             <version>${ez-common.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_2.11</artifactId>
-            <version>${scalatest.version}</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.scala-lang</groupId>
-                    <artifactId>scala-library</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
     </dependencies>
 
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>net.alchim31.maven</groupId>
-                    <artifactId>scala-maven-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>compile</goal>
-                                <goal>testCompile</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
 </project>
