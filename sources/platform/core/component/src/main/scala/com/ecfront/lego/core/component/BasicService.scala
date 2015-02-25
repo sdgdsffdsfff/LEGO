@@ -4,6 +4,7 @@ import java.lang.reflect.ParameterizedType
 import java.util.UUID
 
 import com.ecfront.common.BeanHelper
+import com.ecfront.lego.core.component.cache.{Cacheable, DCacheProcessor}
 import com.ecfront.lego.core.component.protocol.{Req, Resp}
 import com.ecfront.lego.core.foundation.{AppSecureModel, IdModel, SecureModel, StandardCode}
 import com.ecfront.storage.PageModel
@@ -12,6 +13,10 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 trait BasicService[M <: AnyRef] extends LazyLogging {
 
   protected val modelClazz = this.getClass.getGenericInterfaces()(0).asInstanceOf[ParameterizedType].getActualTypeArguments()(0).asInstanceOf[Class[M]]
+
+  protected val isIdModel=classOf[IdModel].isAssignableFrom(modelClazz)
+  protected val cacheable = this.getClass.getGenericInterfaces.exists(_.getTypeName == classOf[Cacheable].getName)
+  protected val cacheProcessor = if (cacheable) DCacheProcessor[M](modelClazz) else null
 
   logger.info( """Create Service: model: %s""".format(modelClazz.getSimpleName))
 
@@ -40,20 +45,26 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
   }
 
   protected def executeGetById(id: String, request: Req): Resp[M] = {
-    val preResult = preGetById(id, request)
-    if (preResult) {
-      val result = doGetById(id, request)
-      if (result) {
-        if (result != null) {
-          postGetById(convertToView(result.body, request), preResult.body, request)
+    val cResult = if (cacheable) cacheProcessor.get(id) else null
+    if (cResult == null) {
+      val preResult = preGetById(id, request)
+      if (preResult) {
+        val result = doGetById(id, request)
+        if (result) {
+          if (result.body != null) {
+            if (cacheable) cacheProcessor.save(id, result.body)
+            postGetById(convertToView(result.body, request), preResult.body, request)
+          } else {
+            Resp.fail(StandardCode.NOT_FOUND_CODE, "Model [%s] not exist by %s".format(modelClazz.getSimpleName, id))
+          }
         } else {
-          Resp.fail(StandardCode.NOT_FOUND_CODE, "Model [%s] not exist by %s".format(modelClazz.getSimpleName, id))
+          Resp.fail(result.code, result.message)
         }
       } else {
-        Resp.fail(result.code, result.message)
+        Resp.fail(preResult.code, preResult.message)
       }
     } else {
-      Resp.fail(preResult.code, preResult.message)
+      Resp.success(cResult.get)
     }
   }
 
@@ -70,20 +81,26 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
   }
 
   protected def executeGetByCondition(condition: String, request: Req): Resp[M] = {
-    val preResult = preGetByCondition(condition, request)
-    if (preResult) {
-      val result = doGetByCondition(condition, request)
-      if (result) {
-        if (result != null) {
-          postGetByCondition(convertToView(result.body, request), preResult.body, request)
+    val cResult = if (cacheable) cacheProcessor.get(condition.hashCode + "") else null
+    if (cResult == null) {
+      val preResult = preGetByCondition(condition, request)
+      if (preResult) {
+        val result = doGetByCondition(condition, request)
+        if (result) {
+          if (result.body != null) {
+            if (cacheable) cacheProcessor.save(condition.hashCode + "", result.body)
+            postGetByCondition(convertToView(result.body, request), preResult.body, request)
+          } else {
+            Resp.fail(StandardCode.NOT_FOUND_CODE, "Model [%s] not exist by %s".format(modelClazz.getSimpleName, condition))
+          }
         } else {
-          Resp.fail(StandardCode.NOT_FOUND_CODE, "Model [%s] not exist by %s".format(modelClazz.getSimpleName, condition))
+          Resp.fail(result.code, result.message)
         }
       } else {
-        Resp.fail(result.code, result.message)
+        Resp.fail(preResult.code, preResult.message)
       }
     } else {
-      Resp.fail(preResult.code, preResult.message)
+      Resp.success(cResult.get)
     }
   }
 
@@ -234,6 +251,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
     if (preResult) {
       val result = doSave(model, request)
       if (result) {
+        if (cacheable&&isIdModel) cacheProcessor.save(model.asInstanceOf[IdModel].id, model)
         postSave(result.body, preResult.body, request)
       } else {
         Resp.fail(result.code, result.message)
@@ -281,6 +299,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
       if (preResult) {
         val result = doUpdate(id, model, request)
         if (result) {
+          if (cacheable) cacheProcessor.update(id, model)
           postUpdate(result.body, preResult.body, request)
         } else {
           Resp.fail(result.code, result.message)
@@ -306,6 +325,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
   }
 
   protected def executeDeleteById(id: String, request: Req): Resp[String] = {
+    if (cacheable) cacheProcessor.delete(id)
     val preResult = preDeleteById(id, request)
     if (preResult) {
       val result = doDeleteById(id, request)
@@ -332,6 +352,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
   }
 
   protected def executeDeleteByCondition(condition: String, request: Req): Resp[List[String]] = {
+    if (cacheable) cacheProcessor.delete(condition.hashCode + "")
     val preResult = preDeleteByCondition(condition, request)
     if (preResult) {
       val result = doDeleteByCondition(condition, request)
@@ -358,6 +379,7 @@ trait BasicService[M <: AnyRef] extends LazyLogging {
   }
 
   protected def executeDeleteAll(request: Req): Resp[List[String]] = {
+    if (cacheable) cacheProcessor.deleteAll()
     val preResult = preDeleteAll(request)
     if (preResult) {
       val result = doDeleteAll(request)

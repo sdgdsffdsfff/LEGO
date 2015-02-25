@@ -1,5 +1,6 @@
 package com.ecfront.lego.core.component
 
+import com.ecfront.lego.core.component.cache.Cacheable
 import com.ecfront.lego.core.component.protocol.Req
 import com.ecfront.lego.core.component.storage.JDBCService
 import org.scalatest._
@@ -10,11 +11,9 @@ import scala.concurrent.duration.Duration
 
 class JDBCServiceSpec extends FunSuite {
 
-
+  Startup.startup
 
   test("JDBC服务测试") {
-
-    JDBCService.init
 
     val request = Req("0000", "jzy", "test_app")
 
@@ -81,7 +80,7 @@ class JDBCServiceSpec extends FunSuite {
   }
 }
 
-object TestJDBCService extends JDBCService[TestModel] with FutureBasicService[TestModel]
+object TestJDBCService extends JDBCService[TestModel] with FutureBasicService[TestModel] with Cacheable
 
 
 
