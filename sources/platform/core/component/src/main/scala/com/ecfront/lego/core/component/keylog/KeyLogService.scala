@@ -1,8 +1,7 @@
 package com.ecfront.lego.core.component.keylog
 
-import com.ecfront.lego.core.ComponentInfo
-import com.ecfront.lego.core.component.SyncBasicService
-import com.ecfront.lego.core.component.protocol.Req
+import com.ecfront.lego.core.component.{ComponentInfo, SyncBasicService}
+import com.ecfront.lego.core.foundation.protocol.Req
 import com.ecfront.lego.core.component.storage.JDBCService
 import com.ecfront.lego.core.foundation.{KeyLog, StandardCode}
 

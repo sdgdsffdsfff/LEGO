@@ -1,4 +1,4 @@
-package com.ecfront.lego.core.component.protocol
+package com.ecfront.lego.core.foundation.protocol
 
 import com.ecfront.lego.core.foundation.StandardCode
 

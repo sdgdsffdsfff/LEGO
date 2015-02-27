@@ -1,4 +1,4 @@
-package com.ecfront.lego.core.component.protocol
+package com.ecfront.lego.core.foundation.protocol
 
 import com.ecfront.lego.core.foundation.{AppSecureModel, SecureModel}
 
@@ -9,7 +9,7 @@ case class Req(
                             ) {
   var action: String = _
   var parameters: Map[String, Any] = _
-  var body: String = _
+  var body: Any = _
 }
 
 object Req {

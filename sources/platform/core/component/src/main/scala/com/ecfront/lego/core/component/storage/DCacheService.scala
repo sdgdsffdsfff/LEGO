@@ -2,7 +2,7 @@ package com.ecfront.lego.core.component.storage
 
 import com.ecfront.lego.core.component.BasicService
 import com.ecfront.lego.core.component.cache.DCacheProcessor
-import com.ecfront.lego.core.component.protocol.{Req, Resp}
+import com.ecfront.lego.core.foundation.protocol.{Req, Resp}
 import com.ecfront.lego.core.foundation.{IdModel, StandardCode}
 import com.ecfront.storage.PageModel
 

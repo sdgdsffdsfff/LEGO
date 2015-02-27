@@ -1,7 +1,7 @@
 package com.ecfront.lego.core.component.storage
 
 import com.ecfront.lego.core.component.BasicService
-import com.ecfront.lego.core.component.protocol.{Req, Resp}
+import com.ecfront.lego.core.foundation.protocol.{Req, Resp}
 import com.ecfront.lego.core.foundation.{AppSecureModel, IdModel, SecureModel}
 import com.ecfront.storage.{JDBCStorable, PageModel}
 import com.typesafe.scalalogging.slf4j.LazyLogging

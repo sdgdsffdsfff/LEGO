@@ -2,7 +2,7 @@ package com.ecfront.lego.core.component
 
 import com.ecfront.common.JsonHelper
 import com.ecfront.lego.core.component.communication.Communication
-import com.ecfront.lego.core.component.protocol._
+import com.ecfront.lego.core.foundation.protocol._
 import com.ecfront.lego.core.foundation._
 import com.ecfront.storage.PageModel
 import com.typesafe.scalalogging.slf4j.LazyLogging

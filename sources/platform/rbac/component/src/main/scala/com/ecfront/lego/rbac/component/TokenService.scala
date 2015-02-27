@@ -1,7 +1,7 @@
 package com.ecfront.lego.rbac.component
 
 import com.ecfront.lego.core.component.SyncBasicService
-import com.ecfront.lego.core.component.protocol.{Req, Resp}
+import com.ecfront.lego.core.foundation.protocol.{Req, Resp}
 import com.ecfront.lego.core.component.storage.DCacheService
 import com.ecfront.lego.core.foundation.StandardCode
 import com.ecfront.lego.rbac.foundation.LoginInfo

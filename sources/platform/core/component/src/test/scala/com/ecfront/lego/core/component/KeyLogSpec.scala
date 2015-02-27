@@ -1,7 +1,7 @@
 package com.ecfront.lego.core.component
 
 import com.ecfront.lego.core.component.keylog.KeyLogService
-import com.ecfront.lego.core.component.protocol.Req
+import com.ecfront.lego.core.foundation.protocol.Req
 import com.ecfront.lego.core.foundation.StandardCode
 import org.scalatest._
 

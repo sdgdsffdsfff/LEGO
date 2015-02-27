@@ -1,7 +1,7 @@
 package com.ecfront.lego.core.component.communication
 
 import com.ecfront.common.JsonHelper
-import com.ecfront.lego.core.component.protocol.{Req, RespSimple}
+import com.ecfront.lego.core.foundation.protocol.{Req, RespSimple}
 import com.ecfront.lego.core.foundation.StandardCode
 import io.vertx.core.eventbus.Message
 import io.vertx.core.{AsyncResult, Handler, Vertx}

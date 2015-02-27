@@ -1,6 +1,6 @@
 package com.ecfront.lego.core.component.communication
 
-import com.ecfront.lego.core.component.protocol.{Req, RespSimple}
+import com.ecfront.lego.core.foundation.protocol.{Req, RespSimple}
 
 trait Communication {
 

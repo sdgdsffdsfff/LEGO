@@ -3,7 +3,7 @@ package com.ecfront.lego.core.component.cache
 import java.util.concurrent.CountDownLatch
 
 import com.ecfront.common.JsonHelper
-import com.ecfront.lego.core.ComponentInfo
+import com.ecfront.lego.core.component.ComponentInfo
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.shareddata.AsyncMap
 import io.vertx.core.{AsyncResult, Handler}

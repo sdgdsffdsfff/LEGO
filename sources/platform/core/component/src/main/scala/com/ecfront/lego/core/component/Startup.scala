@@ -3,7 +3,6 @@ package com.ecfront.lego.core.component
 import java.util.concurrent.CountDownLatch
 
 import com.ecfront.common.ConfigHelper
-import com.ecfront.lego.core.ComponentInfo
 import com.ecfront.lego.core.component.storage.JDBCService
 import com.fasterxml.jackson.databind.JsonNode
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -27,7 +26,7 @@ object Startup extends App with LazyLogging {
     ComponentInfo.config = config.get("config")
   }
 
-  private def serviceInit: Unit ={
+  private def serviceInit: Unit = {
     JDBCService.init
   }
 

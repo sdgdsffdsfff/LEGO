@@ -1,6 +1,6 @@
 package com.ecfront.lego.core.component
 
-import com.ecfront.lego.core.component.protocol.{Req, Resp}
+import com.ecfront.lego.core.foundation.protocol.{Req, Resp}
 import com.ecfront.storage.PageModel
 
 trait SyncBasicService[M <: AnyRef] extends BasicService[M] {

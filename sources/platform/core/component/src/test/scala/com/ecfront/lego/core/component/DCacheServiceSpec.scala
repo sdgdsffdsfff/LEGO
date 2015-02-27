@@ -1,6 +1,6 @@
 package com.ecfront.lego.core.component
 
-import com.ecfront.lego.core.component.protocol.Req
+import com.ecfront.lego.core.foundation.protocol.Req
 import com.ecfront.lego.core.component.storage.DCacheService
 import org.scalatest._
 

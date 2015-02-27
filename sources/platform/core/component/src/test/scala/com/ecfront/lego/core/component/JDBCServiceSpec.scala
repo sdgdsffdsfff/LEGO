@@ -1,7 +1,7 @@
 package com.ecfront.lego.core.component
 
 import com.ecfront.lego.core.component.cache.Cacheable
-import com.ecfront.lego.core.component.protocol.Req
+import com.ecfront.lego.core.foundation.protocol.Req
 import com.ecfront.lego.core.component.storage.JDBCService
 import org.scalatest._
 

@@ -5,7 +5,7 @@ import java.util.UUID
 
 import com.ecfront.common.BeanHelper
 import com.ecfront.lego.core.component.cache.{Cacheable, DCacheProcessor}
-import com.ecfront.lego.core.component.protocol.{Req, Resp}
+import com.ecfront.lego.core.foundation.protocol.{Req, Resp}
 import com.ecfront.lego.core.foundation.{AppSecureModel, IdModel, SecureModel, StandardCode}
 import com.ecfront.storage.PageModel
 import com.typesafe.scalalogging.slf4j.LazyLogging

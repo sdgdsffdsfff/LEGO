@@ -3,7 +3,7 @@ package com.ecfront.lego.rbac.component
 import java.util.UUID
 
 import com.ecfront.lego.core.component.keylog.KeyLogService
-import com.ecfront.lego.core.component.protocol.{Req, Resp}
+import com.ecfront.lego.core.foundation.protocol.{Req, Resp}
 import com.ecfront.lego.core.foundation.StandardCode
 import com.ecfront.lego.rbac.component.manage.{AccountService, ResourceService}
 import com.ecfront.lego.rbac.foundation.LoginInfo

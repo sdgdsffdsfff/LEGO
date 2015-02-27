@@ -1,4 +1,4 @@
-package com.ecfront.lego.core
+package com.ecfront.lego.core.component
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.vertx.core.Vertx
