@@ -14,6 +14,10 @@
     <artifactId>lego-rbac-component</artifactId>
     <version>${lego.version}</version>
 
+    <properties>
+        <mainClass>com.ecfront.lego.rbac.component.Startup</mainClass>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.ecfront</groupId>

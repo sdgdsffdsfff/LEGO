@@ -18,7 +18,6 @@
     <properties>
         <ez-common.version>0.3.2</ez-common.version>
         <lego.version>1.0</lego.version>
-        <mainClass>com.ecfront.lego.core.component.Startup</mainClass>
     </properties>
 
     <dependencies>

@@ -8,7 +8,7 @@ import org.scalatest._
 
 class KeyLogSpec extends FunSuite {
 
-  Startup.startup
+  MockStartup.startup()
 
   test("关键日志测试") {
     val request = Req("0000", "jzy", "test_app")

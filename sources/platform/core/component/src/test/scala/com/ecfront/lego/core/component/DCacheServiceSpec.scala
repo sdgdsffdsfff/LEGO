@@ -7,7 +7,7 @@ import org.scalatest._
 
 class DCacheServiceSpec extends FunSuite {
 
-  Startup.startup
+  MockStartup.startup()
 
   test("分布式缓存服务测试") {
 

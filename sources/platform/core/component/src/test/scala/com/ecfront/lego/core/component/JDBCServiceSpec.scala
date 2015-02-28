@@ -11,7 +11,7 @@ import scala.concurrent.duration.Duration
 
 class JDBCServiceSpec extends FunSuite {
 
-  Startup.startup
+  MockStartup.startup()
 
   test("JDBC服务测试") {
 

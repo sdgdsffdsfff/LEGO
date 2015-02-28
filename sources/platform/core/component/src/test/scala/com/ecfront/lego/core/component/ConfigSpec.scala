@@ -5,10 +5,10 @@ import org.scalatest._
 
 class ConfigSpec extends FunSuite {
 
-  Startup.startup
+  MockStartup.startup()
 
   test("配置测试") {
-    assert(ComponentInfo.id == "test")
+    assert(MockStartup.getComponentInfo.id == "test")
   }
 }
 
