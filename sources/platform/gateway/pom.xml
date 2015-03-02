@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.ecfront</groupId>
+        <artifactId>lego-parent</artifactId>
+        <version>1.0</version>
+    </parent>
+
+    <groupId>com.ecfront</groupId>
+    <artifactId>lego-gateway-component</artifactId>
+    <version>${lego.version}</version>
+
+    <properties>
+        <mainClass>com.ecfront.lego.gateway.component.Startup</mainClass>
+        <ez-rpc.version>1.1</ez-rpc.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>lego-core-component</artifactId>
+            <version>${lego.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ez-rpc</artifactId>
+            <version>${ez-rpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>lego-rbac-foundation</artifactId>
+            <version>${lego.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>

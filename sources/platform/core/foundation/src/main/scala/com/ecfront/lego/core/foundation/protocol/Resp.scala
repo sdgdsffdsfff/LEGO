@@ -21,8 +21,3 @@ object Resp {
   implicit def isSuccess[M](dto: Resp[M]): Boolean = StandardCode.SUCCESS_CODE == dto.code
 
 }
-
-case class RespSimple(
-                             code: String,
-                             message: String,
-                             body: String=null)

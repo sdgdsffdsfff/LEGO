@@ -3,7 +3,7 @@ package com.ecfront.lego.core.component.cache
 import java.util.concurrent.CountDownLatch
 
 import com.ecfront.common.JsonHelper
-import com.ecfront.lego.core.component.ComponentInfo
+import com.ecfront.lego.core.component.Global
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.shareddata.AsyncMap
 import io.vertx.core.{AsyncResult, Handler}
@@ -18,7 +18,7 @@ case class DCacheProcessor[M <: AnyRef](modelClazz: Class[M]) extends LazyLoggin
 
   private def init(): Unit = {
     val latch = new CountDownLatch(1)
-    ComponentInfo.vertx.sharedData().getClusterWideMap(cacheName, new Handler[AsyncResult[AsyncMap[String, String]]] {
+    Global.vertx.sharedData().getClusterWideMap(cacheName, new Handler[AsyncResult[AsyncMap[String, String]]] {
       override def handle(res: AsyncResult[AsyncMap[String, String]]): Unit = {
         if (res.succeeded()) {
           CACHE = res.result()
@@ -50,7 +50,7 @@ case class DCacheProcessor[M <: AnyRef](modelClazz: Class[M]) extends LazyLoggin
     CACHE.get(id, new Handler[AsyncResult[String]] {
       override def handle(res: AsyncResult[String]): Unit = {
         if (res.succeeded()) {
-          result =if(res.result()==null) null else Some(JsonHelper.toObject(res.result(), modelClazz))
+          result = if (res.result() == null) null else Some(JsonHelper.toObject(res.result(), modelClazz))
         } else {
           logger.error("Get cache[%s] fail : %s".format(cacheName, id), res.cause())
         }

@@ -1,8 +1,8 @@
 package com.ecfront.lego.core.component.keylog
 
-import com.ecfront.lego.core.component.{ComponentInfo, SyncBasicService}
-import com.ecfront.lego.core.foundation.protocol.Req
+import com.ecfront.lego.core.component.{Global, SyncBasicService}
 import com.ecfront.lego.core.component.storage.JDBCService
+import com.ecfront.lego.core.foundation.protocol.Req
 import com.ecfront.lego.core.foundation.{KeyLog, StandardCode}
 
 object KeyLogService extends JDBCService[KeyLog] with SyncBasicService[KeyLog] {
@@ -48,7 +48,7 @@ object KeyLogService extends JDBCService[KeyLog] with SyncBasicService[KeyLog] {
     log.code = code
     log.message = message
     log.action = request.action
-    log.componentId = ComponentInfo.id
+    log.componentId = Global.id
     log.trackId = request.cId
     save(log, request)
   }
